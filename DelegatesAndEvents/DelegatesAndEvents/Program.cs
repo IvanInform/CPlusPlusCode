@@ -13,8 +13,15 @@ namespace DelegatesAndEvents
         public static event MyDel myEvent;
         public static event secondDel EventTwo;
         public delegate void AnominouseDelegate(int x);
+        //a comment is added to the project
+        //another event is added
+        public static event MyDel TestEvent;
+
         public static void Main(string[] args)
         {
+            TestEvent += new MyDel(delegate() { Console.WriteLine("This is delegate example"); });
+            TestEvent.Invoke();
+
             myEvent += Hello;
             myEvent += Bye;
             secondDel testdel = new secondDel(divide);
