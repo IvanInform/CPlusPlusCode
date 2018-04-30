@@ -1,0 +1,320 @@
+#pragma once;
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+#include <vector>
+#include <iterator>
+#include <algorithm>
+
+/*Создать класс СПРАВОЧНИК со следующими полями:
+1. Название фирмы;
+2. Владелец;
+3. Телефон;
+4. Адрес;
+5. Род деятельности.
+Реализовать следующие возможности:
+1. Поиск по названию;
+2. Поиск по владельцу;
+3. Поиск по номеру телефона;
+4. Поиск по роду деятельности;
+5. Показ всех записей и добавление.
+Вся информация, должна сохранятся в файле, должна
+быть реализована возможность добавления новых данных.*/
+using namespace std;
+class directory;
+class directory{
+	struct entry{
+		string firm_name;
+		string owner;
+		string tel;
+		string address;
+		string engagement;
+		friend class directory;
+	};
+	int size;
+	vector<entry>dir;
+
+public:
+	directory();
+	~directory();
+	void print();
+	int search_firm(string);
+	int search_owner(string);
+	int search_engagement(string);
+	int search_address(string);
+	int search_tel(string);
+	void save(char*filename);
+	void read(char*filename);
+	void push();
+	void print_entry(entry);
+	
+};
+directory::directory():size(0){
+	
+}
+
+
+directory::~directory(){}
+void directory::push() {
+	
+	entry temp;
+		cout << "Enter firm's name: " << endl;
+		getline(cin,temp.firm_name);
+		cout << "Enter owner: " << endl;
+		getline(cin, temp.owner);
+		cout << "Enter address" << endl;
+		getline(cin, temp.address);
+		cout << "Enter engagement: "<<endl;
+		getline(cin, temp.engagement);
+		cout << "Enter telephone number: " << endl;
+		getline(cin, temp.tel);
+		dir.push_back(temp);
+		size++;
+	
+}
+
+void directory::print(){
+	if (size == 0){
+		cout << "The directory is empty";
+		return;	
+	}
+	vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		cout << "Firm's name: " << itr->firm_name << endl;
+		cout << "Firm's owner: " << itr->owner << endl;
+		cout << "Engagement: " << itr->engagement << endl;
+		cout << "Address: " << itr->address << endl;
+		cout << "Telephone number: " << itr->tel << endl;
+
+	}
+
+}
+void directory::print_entry(entry obj){
+	cout << "Firm's name: " << obj.firm_name << endl;
+	cout << "Firm's owner: " << obj.owner << endl;
+	cout << "Address: " << obj.address << endl;
+	cout << "Engagement: " << obj.engagement << endl;
+	cout << "Telephone number: " << obj.tel << endl;
+
+}
+int directory::search_firm(string m_name){
+vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		if (itr->firm_name == m_name)
+		{
+			print_entry(*itr);
+			return 0; 
+		} 
+	}
+
+	return 1;
+}
+int directory::search_owner(string key){
+	vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		if (itr->owner == key)
+		{
+			print_entry(*itr);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+int directory::search_engagement(string key){
+	vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		if (itr->engagement == key)
+		{
+			print_entry(*itr);
+			return 0;
+		}
+	}
+
+	return 1;
+
+}
+int directory::search_address(string key){
+
+	vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		if (itr->address == key)
+		{
+			print_entry(*itr);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+int directory::search_tel(string key){
+	vector<entry>::iterator itr;
+	for (itr = dir.begin(); itr != dir.end(); itr++)
+	{
+		if (strcmp((itr->tel.c_str()),(key.c_str()))==0)
+		{
+			print_entry(*itr); 
+			/*cout << "Firm's name: " << itr->firm_name << endl;
+			cout << "Firm's owner: " << itr->owner << endl;
+			cout << "Address: " << itr->address << endl;
+			cout << "Engagement: " << itr->engagement << endl;
+			cout << "Telephone number: " << itr->tel << endl;*/
+			return 0;
+		}
+	}
+	return 1;
+
+}
+
+void directory::save(char*filename){
+	ofstream outfile(filename, ios::out | ios::app);
+	if (!outfile.is_open())
+	{
+		cerr << "Error opening file" << endl;
+		exit(EXIT_FAILURE);
+	}
+	for (int i = 0; i < dir.size(); i++)
+	{
+		outfile << dir[i].firm_name << "\n" << dir[i].owner
+			<< "\n" << dir[i].address << "\n" <<dir[i].engagement<<"\n"<< dir[i].tel << endl;
+	}
+	
+	outfile.close(); 
+
+}
+void directory::read(char*filename){
+	ifstream infile(filename, ios::in);
+	if (!infile.is_open())
+	{
+		cerr << "Error opening file" << endl;
+		exit(EXIT_FAILURE);
+	}
+	entry sample;
+	string temp;
+	int count = 1;
+	while (!infile.eof())
+	{
+		getline(infile, temp);
+		switch (count){
+			case 1:
+				sample.firm_name = temp;
+				break;
+			case 2:
+				sample.owner = temp;
+				break;
+			case 3:
+				sample.address = temp;
+				break;
+			case 4:
+				sample.engagement = temp;
+				break;
+			case 5:
+				sample.tel = temp;
+				break;
+			}
+		count++;
+		if (count == 6)
+		{
+			count = 1;
+			dir.push_back(sample);
+		}
+	}
+	infile.close();
+}
+main.cpp:
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <string.h>
+#include "Student_file.h"
+
+using namespace std;
+
+int main()
+{
+	
+	cout << "***************************************************************\
+                         \n\t\t\t\tMenu\n \
+**************************************************************\n";
+	cout << "Press<1> to create new directory   Press<2> Retrieve saved directory";
+	cout << endl;
+	cout << endl;
+	int number;
+	cin >> number; cin.ignore();
+	switch (number)
+	{
+	case 1:
+	{directory example;
+	cout << "Enter directory size:";
+	int len;
+	cin >> len; cin.ignore();
+	for (int i = 0; i < len; i++)
+	{
+		example.push();
+	}
+	cout << "Directory content:" << endl;
+	example.print();
+	example.save("directory.txt");
+	break; }
+	case 2:
+	{
+		directory example;
+		example.read("directory.txt");
+		cout << "Press<1> to search by name\tPress<2> to search by owner\n\
+Press<3> to search by address\tPress<4> to search by engagement\n\
+Press<5>to search by telephone:";
+		int choice;string str;
+		cin >> choice; cin.ignore();
+		while (choice != 6){
+			switch (choice)
+			{
+			case 1:
+				cout << "Enter name:";
+				getline(cin,str);
+				example.search_firm(str);
+				break;
+			case 2:
+				cout << "Enter owner: ";
+				getline(cin, str);
+				example.search_owner(str);
+				break;
+			case 3:
+				cout << "Enter address:";
+				getline(cin, str);
+				example.search_address(str);
+				break;
+			case 4:
+				cout << "Enter engagement:";
+				getline(cin, str);
+				example.search_engagement(str);
+				break;
+			case 5:
+				cout << "Enter telephone: ";
+				getline(cin, str);
+				example.search_tel(str);
+				break;
+			default:
+				cout << "No such choice...";
+				break;
+			}
+			cout << endl; cout << endl;
+			cout << "Press<1> to search by name\tPress<2> to search by owner\n\
+Press<3> to search by address\tPress<4> to search by engagement\n\
+Press<5>to search by telephone:";
+			cin >> choice; cin.ignore();
+		}
+
+	}
+		
+}
+	system("pause");
+	return 0;
+}

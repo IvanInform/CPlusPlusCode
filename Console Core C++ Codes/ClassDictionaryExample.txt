@@ -1,0 +1,269 @@
+#include <iostream>
+#include <utility>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <string.h>
+//#include <vector>
+#include <sstream> 
+#include <stdio.h>
+#include <fstream>
+//#include <queue>
+////#include <deque>
+#include <map>
+//#include <queue>
+//#include <list>
+//#include <stack>
+#include <functional>
+//#include <cassert>
+//#include <set>
+using namespace std;
+
+static string name;
+
+struct com_map
+{
+	bool operator()(string lhs) const
+	{
+		return lhs.compare(name) == 0;
+	}
+};
+struct comparator{
+	bool operator()(const string&x,const string&y){
+		
+		return x.compare(y)< 0;
+
+	}
+};
+typedef pair<string, string> mypair;
+typedef map<string, string, comparator> mymap;
+string toString( std::pair< string, string > data)
+{
+	std::ostringstream str;
+	str << data.first << "=> " << data.second;
+	return str.str();
+}
+
+
+class dictionary{
+	mymap data;
+public:
+	dictionary();
+	dictionary(mymap&obj);
+	~dictionary();
+	mymap getdata()const { return data; }
+	dictionary(const dictionary&obj);
+	void show();
+	void add();
+	void del_word();
+	void edit();
+	void save(const string&);
+	void read(const string&);
+
+};
+dictionary::dictionary(){
+}
+dictionary::dictionary(mymap&obj){
+	data.insert(obj.begin(), obj.end());
+
+}
+void print(mypair& obj){
+	cout << obj.first << "=>" << obj.second << endl;
+}
+void dictionary::show(){
+
+	transform(data.begin(), data.end(), ostream_iterator<string>(cout, "\n"), toString);
+	/*for_each(data.begin(), data.end(), print);*/
+}
+dictionary::~dictionary(){}
+dictionary::dictionary(const dictionary&obj){
+	data.insert(obj.getdata().begin(), obj.getdata().end());
+}
+void dictionary::add(){
+	/*mypair temp;*/
+	cout << "Please, enter key:" << endl; cin.ignore();
+	string key; getline(cin,key);
+	cout << "Please, enter definition" << endl;
+	string def; getline(cin, def);
+	pair<mymap::iterator, bool> itr;
+	/*itr = data.emplace(key,def);*/
+	itr = data.emplace(mypair(key, def));
+	if (itr.second){
+		cout << "Entry is successful\n";
+	}
+
+	else { cout << "Entry " << def << "is unsuccessful\n"; }
+}
+void dictionary::del_word(){
+	cout << "Enter key to delete: " << endl; cin.ignore();
+	string key; getline(cin,key);
+name=key;
+mymap::iterator it = find_if(data.begin(), data.end(), [](mypair x){return x.first.compare(name) == 0; });
+if (it != data.end()){
+	data.erase(it);
+}
+else { cerr << "No such entry!" << endl;
+exit(-1);
+	}
+
+}
+void dictionary::edit(){
+	cout << "Enter key to edit:" << endl; cin.ignore();
+	string key; getline(cin,key);
+	name = key;
+	mymap::iterator it = find_if(data.begin(), data.end(), [](mypair x){return x.first.compare(name) == 0; });
+	if (it != data.end()){data.erase(it);}
+	else { cerr << "No such entry!" << endl;
+	exit(-1);
+	}
+	cout << "Enter new definition:" << endl;
+	string def;
+	getline(cin, def);
+	data.emplace(make_pair(key, def));
+}
+void dictionary::save(const string &filename){
+	ofstream out(filename.c_str(), ios::out | ios::trunc);
+	if (!out.is_open()){
+		cerr << "Can't open file" << endl;
+		exit(-1);
+	
+	}
+	for (mymap::iterator it = data.begin(); it != data.end(); it++)
+	{
+		out << it->first << " " << it->second<<" ";
+	}
+	out.close();
+}
+void dictionary::read(const string&filename){
+	string temp;
+	vector<string>myvector;
+	if (!data.empty()){
+		data.erase(data.begin(),data.end());
+	}
+	ifstream in(filename.c_str(), ios::in);
+	if (!in.is_open())
+	{
+		cerr << "Can't open file" << endl;
+		exit(-1);
+	}
+	in.seekg(0, ios::beg);
+	while (!in.eof())
+	{
+		getline(in, temp, ' ');
+		if (!temp.empty())
+		{
+			myvector.push_back(temp);
+		}
+	}
+	in.close();
+	for (int i = 0; i < myvector.size(); i+=2)
+	{
+		data.emplace(make_pair(myvector[i], myvector[i + 1]));
+
+	}
+
+}
+int menu(){
+	string header = "***********************************************************\n";
+	string footer = "**************************end*******************************\n";
+	string menu = "Here's program dictionary. If you want to create dictionary, press <1>\n\
+If you want to add entry press <2>\nIf you want to delete entry press <3>\n\
+If you want to edit entry press <4>\nIf you want to show all entries, press <5>\n\
+If you want to save entries into file, press <6>\n\
+If you want to read entries from file, press <7>\n";
+	cout << header << menu << footer; 
+	int choice;
+	while (!scanf("%d", &choice))
+	{
+		cin.get();
+	}
+	return choice;
+}
+
+void select(int choice, dictionary&obj)
+{
+	int number;
+	string filename;
+	switch (choice){
+	case 1:{
+			   cout << "Enter number's of entries to add to dictionary:" << endl;
+			   cin >> number; cin.ignore();
+			   for (int i = 0; i < number; i++)
+			   {
+				   obj.add();
+			   }
+	
+	}
+		break;
+	case 2:
+	{obj.add(); }
+		break;
+	case 3:{
+			   obj.del_word();
+	}
+		break;
+	case 4:{
+			   obj.edit();
+	}
+		break;
+	case 5:{
+			   obj.show();
+	}
+		break;
+	case 6:{
+			   cout << "Please, enter filename to save to:" << endl; cin.ignore();
+			   getline(cin, filename);
+			   obj.save(filename);
+	}
+		break;
+	case 7:{
+			   cout << "Please, enter filename to read from:" << endl; cin.ignore();
+			   getline(cin, filename);
+			   obj.read(filename);
+	}
+		break;
+	default: cout << "Wrong choice, retry!" << endl;
+	}
+	
+}
+
+main.cpp:
+
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <utility>
+//#include <stack>
+//#include <queue>
+////#include <deque>
+//#include <queue>
+//#include <list>
+//#include <functional>
+//#include <stdio.h>
+//#include <string.h>
+//#include <sstream>  
+//#include <cassert>
+//#include <set>
+#include "dictionary_string.h"
+using namespace std;
+extern string name;
+
+int main()
+{	
+	dictionary A;
+	char cont='a';
+	
+	while (true){
+	select(menu(), A);
+	cout << "If you want to quit, press <q>" << endl;
+	cin >> cont; cin.ignore();
+	if (cont == 'q')break;
+	}
+	cout << "Good Bye!" << endl;
+	system("pause");
+	return 0;
+
+}

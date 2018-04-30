@@ -1,0 +1,794 @@
+main_file:
+
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <ctime>
+#include <iterator>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <ctime>
+#include <string.h>
+#include <string>
+#include <stdlib.h>
+#include <time.h>
+#include "game.h"
+using namespace std;
+
+int main()
+{
+	srand(time(NULL));
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+			SetConsoleTitle(L"ALIENS GAME");
+			SMALL_RECT mywindow = {0,0, col-1, row-1};
+			SetConsoleWindowInfo(hStdOut, TRUE, &mywindow);
+			COORD bufferSize = {col*row};
+			SetConsoleScreenBufferSize(hStdOut, bufferSize);
+			DWORD screen_color = BACKGROUND_BLUE ;
+			SetConsoleTextAttribute(hStdOut, screen_color);
+			
+			CONSOLE_SCREEN_BUFFER_INFO csbinfo;
+			GetConsoleScreenBufferInfo(hStdOut, &csbinfo);
+
+	game mygame(hStdOut, csbinfo);
+	mygame.play();
+	return 0;
+
+}
+
+game_header.h
+
+#pragma once
+
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <ctime>
+#include <vector>
+#include <ctime>
+#include <string.h>
+#include <string>
+#include <chrono>
+using namespace std;
+
+const int col = 60;
+const int row = 40;
+class game_header{
+	WORD header_text;
+	vector<string> letterA;
+	vector<string> letterL;
+	vector<string> letterI;
+	vector<string> letterE;
+	vector<string> letterN;
+	vector<string> letterS;
+	vector<string>letterW;
+	vector<string>letterO;
+	vector<string>letterT;
+	vector<string>exclaim;
+	COORD let_pos;
+	public:
+	game_header();
+	void header_draw(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbiInfo);
+	void clear_screen(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo);
+	void won_footer(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbiInfo);
+	void lost_footer(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbiInfo);
+};
+game_header::game_header(){
+	header_text = FOREGROUND_RED | FOREGROUND_INTENSITY | BACKGROUND_BLUE /*| BACKGROUND_INTENSITY*/;
+	letterA.push_back(string("    #     "));
+	letterA.push_back(string("   # #   "));
+	letterA.push_back(string("  #####   "));
+	letterA.push_back(string(" #     #  "));
+	letterA.push_back(string("#       # "));
+	letterL.push_back(string(" #        "));
+	letterL.push_back(string(" #        "));
+	letterL.push_back(string(" #        "));
+	letterL.push_back(string(" #        "));
+	letterL.push_back(string(" ######## "));
+	letterI.push_back(string("   ###    "));
+	letterI.push_back(string("    #     "));
+	letterI.push_back(string("    #     "));
+	letterI.push_back(string("    #     "));
+	letterI.push_back(string("   ###    "));
+	letterE.push_back(string("#######   "));
+	letterE.push_back(string("#         "));
+	letterE.push_back(string("#######   "));
+	letterE.push_back(string("#         "));
+	letterE.push_back(string("#######   "));
+	letterN.push_back(string("#       # "));
+	letterN.push_back(string("# #     # "));
+	letterN.push_back(string("#   #   # "));
+	letterN.push_back(string("#      ## "));
+	letterN.push_back(string("#       #"));
+	letterS.push_back(string("   ###### "));
+	letterS.push_back(string("  #       "));
+	letterS.push_back(string("	#  ## # "));
+	letterS.push_back(string("        # "));
+	letterS.push_back(string("  ######  "));
+	letterW.push_back(string("#   #   # "));
+	letterW.push_back(string("#   #   # "));
+	letterW.push_back(string("#   #   # "));
+	letterW.push_back(string("#   #   # "));
+	letterW.push_back(string("  #   #   "));
+	letterO.push_back(string("  #####   "));
+	letterO.push_back(string("#       # "));
+	letterO.push_back(string("#       # "));
+	letterO.push_back(string("#       # "));
+	letterO.push_back(string("  #####   "));
+	letterT.push_back(string(" ######## "));
+	letterT.push_back(string("    #     "));
+	letterT.push_back(string("    #     "));
+	letterT.push_back(string("    #     "));
+	letterT.push_back(string("    #     "));
+	exclaim.push_back(string("    #     "));
+	exclaim.push_back(string("    #     "));
+	exclaim.push_back(string("    #     "));
+	exclaim.push_back(string("          "));
+	exclaim.push_back(string("    #     "));
+	let_pos = {0,0};
+}
+void game_header::clear_screen(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo)
+{
+	CHAR_INFO consbuffer[col*row];
+	for (int i = 0; i < col*row; i++)
+	{
+		consbuffer[i].Char.UnicodeChar = ' ';
+		consbuffer[i].Attributes = csbinfo.wAttributes;
+	}
+	COORD charPosition = { 0, 0 };
+	SMALL_RECT writeArea = { 0, 0, col - 1, row - 1 };
+	COORD bufferSize = { col, row };
+	WriteConsoleOutput(whnd, consbuffer, bufferSize, charPosition, &writeArea);
+
+}
+void game_header::header_draw(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo) {
+	DWORD previous_text = csbinfo.wAttributes;
+	SetConsoleTextAttribute(whnd, header_text);
+	let_pos = {1,10};
+			//draw letter A;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterA)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 9;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterL)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 9;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterI)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 9;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterE)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 9;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterN)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 9;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterS)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+
+		SetConsoleCursorPosition(whnd, { 1, 30 });
+		cout << "Your spaceship defends planet from aggressive aliens. You\n have to destroy them before\
+ they get to the planet. You \n can  make one shot until it destroys alien or reaches\n screen  top.\
+To move your ship press arrows <UP>, <DOWN>,\n <LEFT>, <RIGHT>. To fire press <SPACE>. To QUIT press<ESC>.";
+		SetConsoleTextAttribute(whnd, previous_text);
+}
+void game_header::won_footer(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo){
+DWORD previous_text = csbinfo.wAttributes;
+	SetConsoleTextAttribute(whnd, header_text);
+	let_pos = {10,15};
+			//draw letter A;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterW)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterO)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterN)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : exclaim)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		
+		SetConsoleTextAttribute(whnd, previous_text);
+}
+void game_header::lost_footer(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo){
+
+DWORD previous_text = csbinfo.wAttributes;
+	SetConsoleTextAttribute(whnd, header_text);
+	let_pos = {10,15};
+			//draw letter A;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterL)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterO)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterS)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : letterT)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		let_pos.X += 10;
+		let_pos.Y -= 5;
+		//draw letter L;
+		SetConsoleCursorPosition(whnd, let_pos);
+		for (auto x : exclaim)
+		{
+			cout << x;
+			let_pos.Y += 1;
+			SetConsoleCursorPosition(whnd, let_pos);
+		}
+		
+		SetConsoleTextAttribute(whnd, previous_text);
+
+}
+plane_main.h
+
+#pragma once
+
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <ctime>
+#include <vector>
+#include <ctime>
+#include <string.h>
+#include <string>
+#include <chrono>
+#include "game_header.h"
+
+using namespace std;
+static enum run_fire{ FIRE, CEASE };
+run_fire fire_st;
+class alien;
+static enum dir{ RIGHT, LEFT }direction;
+
+bool operator==(const COORD &left, const COORD&right)
+{
+	return (left.X == right.X)&& (left.Y == right.Y);
+}
+
+bool check_coor( vector< COORD>&x, COORD&y )
+{
+	for (vector<COORD>::iterator it = x.begin(); it != x.end(); it++)
+	{
+		if (*it == y)
+			return true;
+	}
+
+}
+class Timer
+{
+public:
+	Timer() : beg_(clock_::now()) {}
+	void reset() { beg_ = clock_::now(); }
+	double elapsed() const {
+		return std::chrono::duration_cast<second_>
+			(clock_::now() - beg_).count();
+	}
+
+private:
+	typedef std::chrono::high_resolution_clock clock_;
+	typedef std::chrono::duration<double, std::ratio<1> > second_;
+	std::chrono::time_point<clock_> beg_;
+};
+void gotoXY_(HANDLE hwnd, int x, int y){
+	COORD my_position; my_position.X = x;
+	my_position.Y = y;
+	SetConsoleCursorPosition(hwnd, my_position);
+}
+class figure{
+	vector<string> data;
+	string space;
+	COORD position;
+	int len;
+	COORD top_gun;
+	DWORD figure_text;
+	DWORD gun_text;
+	int fire_time;
+	int fire_top;
+	int fire_count;
+	COORD collide;
+	friend class alien;
+public:
+	figure();
+	~figure();
+	void draw(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo);
+	void move(HANDLE hwnd, dir some_dir, CONSOLE_SCREEN_BUFFER_INFO csbinfo, run_fire &fire_st);
+	void fire();
+	int get_right(){ return position.X+len; }
+	int get_left(){ return position.X; }
+	COORD get_top(){ return top_gun; }
+	void draw_fire(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo);
+	void fire_gun(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, run_fire& fire_st);
+	int get_fire_top(){ return top_gun.Y; }
+	void set_fire_top(){ top_gun.Y = -1; }
+	void reset_fire(){ top_gun = { (position.X + 4), (position.Y - 1) }; collide = {top_gun.X, top_gun.Y}; }
+	void destroy_fire(HANDLE hwnd, COORD dest);
+	COORD get_collide(){ return collide; }
+};
+figure::figure(){
+	string plane0 = "&   &   &";
+	string plane1("&&&&&&&&&");
+	string plane2("&&&&&&&&&");
+	string plane3("&&&&&&&&&");
+	
+	data.push_back(plane0);
+	data.push_back(plane1); data.push_back(plane2); data.push_back(plane3);
+	 space = " "; 
+	len = data[0].size();
+	position = { 20,36 };
+	top_gun = { (position.X + 4), (position.Y-1) };
+	//int color=16*BackGroundColor+ForeGroundColor;
+	int color = 16 * 1 + 7;
+	figure_text = color; 
+	fire_time = 500;
+	fire_top = top_gun.Y;
+	gun_text = FOREGROUND_GREEN | FOREGROUND_INTENSITY|BACKGROUND_BLUE;
+	fire_count = 0;
+	collide = {0,0};
+}
+figure::~figure(){}
+
+void figure::draw(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo){
+	COORD draw_pos = position;
+	DWORD previous_text=csbinfo.wAttributes;
+	SetConsoleTextAttribute(hwnd, figure_text);
+	for (int i = 0; i < data.size(); i++)
+	{		
+		gotoXY_(hwnd,draw_pos.X, draw_pos.Y);
+		cout << data[i];
+		draw_pos.Y += 1;
+	}
+	SetConsoleTextAttribute(hwnd, previous_text);
+}
+
+void figure::move(HANDLE hwnd, dir direction, CONSOLE_SCREEN_BUFFER_INFO csbinfo, run_fire &fire_st){
+	
+	if (direction == RIGHT){
+		COORD space_pos = position;
+		position.X += 1; 
+		draw(hwnd,csbinfo);
+		if (top_gun.Y == -1 || fire_count == 0||fire_st==CEASE){
+			reset_fire();
+		}
+		string space = " ";
+		for (int i = 0; i < 4; i++)
+		{
+			SetConsoleCursorPosition(hwnd, space_pos);
+			cout << space;
+			space_pos.Y += 1;
+		}
+	}
+	else {
+		COORD space_pos = position;
+		int len = data[0].size();
+		space_pos.X += len - 1;
+		position.X -= 1; 
+		draw(hwnd, csbinfo);
+		if (top_gun.Y == -1 || fire_count == 0 || fire_st == CEASE){
+			reset_fire();
+		}
+		string space = " ";
+		for (int i = 0; i < 4; i++)
+		{
+			SetConsoleCursorPosition(hwnd, space_pos);
+			cout << space;
+			space_pos.Y += 1;
+		}
+	}
+}
+void figure::draw_fire(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo){
+	DWORD pr_color = csbinfo.wAttributes;
+	SetConsoleTextAttribute(hwnd, gun_text);
+	
+		gotoXY_(hwnd, top_gun.X, top_gun.Y);
+		cout << '@';
+
+	collide = { top_gun.X, top_gun.Y };
+
+	SetConsoleTextAttribute(hwnd, pr_color);
+
+
+}
+void figure::destroy_fire(HANDLE hwnd, COORD dest){
+	int temp = dest.Y;
+	for (int i = 0; i < 2; i++)
+	{
+		gotoXY_(hwnd, dest.X, temp);
+		cout << " ";
+		temp += 1;
+	}
+	
+}
+void figure::fire_gun(HANDLE hwnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, run_fire &fire_st){
+	
+	fire_count = 1;
+	if (fire_time > 0) {
+		fire_time--;
+		if (fire_time % 1000 != 0)return;
+	}
+	else {
+		fire_time = rand() % 1500 + 50000;
+	}
+	if (fire_st == FIRE){
+		draw_fire(hwnd, csbinfo); 
+		if (top_gun.Y == -1){
+			destroy_fire(hwnd, top_gun);
+			reset_fire(); fire_st = CEASE;
+		}
+		
+		int del = top_gun.Y;
+		del += 1;
+		gotoXY_(hwnd, top_gun.X, del);
+		cout << " ";
+		top_gun.Y -= 1;
+	}
+}
+
+
+
+class alien{
+	vector<string>data;
+	COORD alien_pos;
+	DWORD alien_text;
+	int alien_top;
+	int moveTime;
+	vector<COORD> front_coord;
+	bool flag_to_move;
+	bool flag_destroy;
+	static int number_players;
+	public:
+	alien(COORD position, DWORD text_color);
+	~alien();
+	void draw(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, COORD pos);
+	void move(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, figure&obj);
+	int gettop(){ return alien_top; }
+	void destroy(HANDLE whnd );
+	
+	vector<COORD> get_fcoord(){ return front_coord; }
+	COORD get_alienpos(){ return alien_pos; }
+	void set_flag(bool x){ flag_to_move = x; }
+	void set_destroy(bool x){ flag_destroy = x; }
+	bool get_destroy(){ return flag_destroy; }
+	static void less_count(){ number_players--; }
+	static int get_count(){ return number_players; }
+	static void set_count(int x){ number_players = x; }
+	int get_any_front(){ return front_coord[0].Y; }
+};
+
+alien::alien(COORD position, DWORD text_color){
+	moveTime = 500;
+	alien_pos = {position.X,position.Y};
+	alien_top = 0;
+	alien_text = text_color;
+	data.push_back(string("***+***")); data.push_back(string("*******"));
+	int a = alien_pos.X;
+	int b = alien_pos.Y;
+	COORD arr[7]= { { a, b+1 }, {a+1, b+1  }, {a+2, b+1 }, {a+3, b+1}, {a+4, b+1}, {a+5, b+1}, {a+6, b+1} };
+	front_coord.assign(arr, arr+7);
+	flag_to_move = true;
+}
+alien::~alien(){}
+void alien::draw(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, COORD pos)
+{
+	DWORD previous_text = csbinfo.wAttributes;
+	SetConsoleTextAttribute(whnd, alien_text);
+	COORD temp = pos;
+	for (int i = data.size() - 1; i >= 0; i--)
+	{
+		gotoXY_(whnd, temp.X, temp.Y);
+		cout << data[i];
+		temp.Y += 1;
+	}
+	int a = temp.X; int b = temp.Y;
+	for (int i = 0; i < 7; i++)
+	{
+		front_coord[i] = {a+i, b-1};
+	}
+	SetConsoleTextAttribute(whnd, previous_text);
+}
+
+void alien::move(HANDLE whnd, CONSOLE_SCREEN_BUFFER_INFO csbinfo, figure&obj)
+{
+	if (moveTime > 0) {
+		moveTime--;
+		if (moveTime % 3000 != 0)return;
+	}
+	else {
+		moveTime = rand() % 1500 + 1000000;
+	}
+	if (flag_to_move == false){ 
+		if (flag_destroy == true) { destroy(whnd); flag_destroy = false; }
+		return; }
+	if (alien_top < csbinfo.srWindow.Bottom){
+		draw(whnd, csbinfo, alien_pos);
+	
+		alien_top = alien_pos.Y + 2;
+
+		gotoXY_(whnd, alien_pos.X, alien_pos.Y - 1);
+		for (int i = 0; i < data[0].size(); i++)
+		{
+			cout << " ";
+		}alien_pos.Y += 1; 
+			
+	}
+}
+void alien::destroy(HANDLE whnd){
+	if (flag_destroy == true){
+		COORD temp = alien_pos;
+		string st = "              ";
+		for (int i = 0; i < 3; i++)
+		{
+			gotoXY_(whnd, temp.X, temp.Y - 1);
+			cout << st;
+			temp.Y += 1;
+		}
+	}
+}
+
+game.h
+
+#pragma once
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+#include <ctime>
+#include <iterator>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <ctime>
+#include <string.h>
+#include <string>
+#include <stdlib.h>
+#include <time.h>
+#include "plane_main.h"
+#define KEY_ARROW_RIGHT 77
+#define KEY_ARROW_LEFT 75
+#define KEY_SPACE 32
+#define KEY_PLUS 43
+using namespace std;
+extern const int col;
+extern const int row;
+extern run_fire fire_st = CEASE;
+
+enum game_status { START, END };
+//game_status game_st = START;
+extern enum dir;
+int alien::number_players;
+
+class game{
+	HANDLE hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbinfo;
+	vector<alien> foreigners;
+	figure A;
+	Timer tmr;
+	game_header header;
+	//game_status status;
+	game_status game_st;
+public:
+	game(HANDLE hStdOut,CONSOLE_SCREEN_BUFFER_INFO csbinfo);
+	void initialize();
+	~game();
+	void play();
+	
+};
+game::~game(){}
+game::game(HANDLE hStdOut, CONSOLE_SCREEN_BUFFER_INFO csbinfo){
+	game_status status = START;
+	this->hStdOut = hStdOut;
+	this->csbinfo = csbinfo;
+	
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, (16 * 1 + (rand() % 8 + 3))));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners.push_back(alien({ rand() % 50 + 0, 0 }, 16 * 1 + (rand() % 8 + 3)));
+	foreigners[0].set_count(8);
+	game_status game_st = START;
+	}
+void game::initialize(){
+		}
+void game::play(){
+	header.clear_screen(hStdOut, csbinfo);
+	header.header_draw(hStdOut, csbinfo);
+	getch();
+	header.clear_screen(hStdOut, csbinfo);
+	A.draw(hStdOut, csbinfo);
+	int iKey = 50;
+
+	do
+	{
+		if (kbhit()){
+			iKey = getch();
+			switch (iKey)
+			{
+			case KEY_ARROW_RIGHT:
+			{if (A.get_right() > csbinfo.srWindow.Right)
+			{
+				cout << "\a";
+			}
+			else {
+				A.move(hStdOut, RIGHT, csbinfo, fire_st);
+
+			}
+			}
+				break;
+			case KEY_ARROW_LEFT:
+			{ if (A.get_left() == csbinfo.srWindow.Left)
+			{
+				cout << "\a";
+			}
+
+			else {
+				A.move(hStdOut, LEFT, csbinfo, fire_st);
+			}
+			break;
+			case KEY_PLUS:
+				foreigners[0].move(hStdOut, csbinfo, A);
+				break;
+			case KEY_SPACE:
+			{
+							  fire_st = FIRE;
+			}
+				break;
+
+			default:
+				break;
+			}
+
+			}
+		}
+
+		foreigners[0].move(hStdOut, csbinfo, A);
+		foreigners[1].move(hStdOut, csbinfo, A);
+
+		double t = tmr.elapsed();
+
+		if (t > 10)
+		{
+			foreigners[2].move(hStdOut, csbinfo, A);
+			foreigners[3].move(hStdOut, csbinfo, A);
+		}
+		if (t> 20){
+			foreigners[4].move(hStdOut, csbinfo, A);
+			foreigners[5].move(hStdOut, csbinfo, A);
+
+		}
+		if (t> 30){
+			foreigners[6].move(hStdOut, csbinfo, A);
+			foreigners[7].move(hStdOut, csbinfo, A);
+
+		}
+		if (fire_st == FIRE){
+			A.fire_gun(hStdOut, csbinfo, fire_st);
+
+		}
+		for (int i = 0; i < foreigners.size(); i++){
+			if (check_coor(foreigners[i].get_fcoord(), A.get_collide())){
+				foreigners[i].set_flag(false); foreigners[i].set_destroy(true); foreigners[i].less_count();
+				fire_st = CEASE; A.reset_fire();
+			}
+			if (foreigners[i].get_fcoord()[0].Y == (csbinfo.srWindow.Bottom - 2))
+			{
+				game_st = END;
+			}
+		}
+		if (foreigners[0].get_count() == 0)
+		{
+			break;
+		}
+		if (game_st == END)
+		{
+			break;
+		}
+
+	} while (iKey != 27);
+	SetConsoleCursorPosition(hStdOut, { 0, 38 }); cout << csbinfo.srWindow.Bottom;
+	if (foreigners[0].get_count() == 0)
+	{
+		header.clear_screen(hStdOut, csbinfo);
+		header.won_footer(hStdOut, csbinfo);
+	}
+	else {
+		header.clear_screen(hStdOut, csbinfo);
+		header.lost_footer(hStdOut, csbinfo);
+	}
+	getch();
+
+}

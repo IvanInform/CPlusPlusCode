@@ -1,0 +1,235 @@
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+//#include <queue>
+////#include <deque>
+#include <queue>
+#include <list>
+#include <functional>
+//#include <cassert>
+#include <set>
+using namespace std;
+static int num;
+struct train{
+	int number;
+	struct time{
+		int hour;
+		int min;
+		}t_time;
+	string depart_st;
+	train(){ number = 0; t_time.hour = 0; t_time.min = 0; depart_st = ""; }
+	train(int m_number,int hr, int min , string m_depart_st)
+	{
+		number = m_number;
+		t_time.hour =hr;
+		t_time.min = min;
+		depart_st =m_depart_st;
+	}
+	train(const train&obj){
+		number = obj.number;
+		t_time.hour = obj.t_time.hour;
+		t_time.min = obj.t_time.min;
+		depart_st = obj.depart_st;
+	}
+	friend ostream& operator<<(ostream&out, struct train&obj);
+	train& operator=(train&obj){
+		if (this == &obj){ return *this; }
+		else {
+		number = obj.number;
+		t_time.hour = obj.t_time.hour;
+		t_time.min = obj.t_time.min;
+		depart_st = obj.depart_st;
+			return *this;
+			}
+		}
+};
+
+ostream& operator<<(ostream&out, struct train&obj)
+{
+	out << "Train number: " << obj.number << " Time: " << obj.t_time.hour<<":"<<obj.t_time.min << " Department station: " << obj.depart_st;
+	return out;
+}
+
+class train_station{
+	vector<struct train>station;
+
+public:
+	train_station();
+	~train_station();
+	train_station(train_station&x);
+	vector<train> get_vec(){ return station; }
+	void push_back(struct train&);
+	train pop(int number);
+	void print_all();
+	void print_one(int number);
+	train search(int number);
+	void clear();
+	void sort_time();
+		
+};
+
+train_station::train_station(){}
+train_station::~train_station(){}
+train_station::train_station(train_station&x){
+	station.assign(x.get_vec().begin(), x.get_vec().end());
+	
+}
+
+void train_station::push_back(struct train&obj){
+	station.push_back(obj);
+}
+train train_station::pop(int s_number){
+	 num = s_number;
+	vector<train>::iterator result=find_if(station.begin(), station.end(), [](train&x){return x.number == num; });
+	if (result != station.end()){
+		train del(result->number, result->t_time.hour, result->t_time.min, result->depart_st);
+		
+		station.erase(result);
+		return del;
+	}
+	else { cout << "Not in the list!\n"; 
+	return struct train(); }
+	}
+void train_station::print_all(){
+	for_each(station.begin(), station.end(), [](train&obj){cout << obj << endl; });
+	
+}
+
+void train_station::print_one(int number){
+	num = number;
+	vector<train>::iterator itr;
+	auto result = find_if(station.begin(), station.end(), [](train&x){return x.number == num; });
+if (result != station.end())
+		{cout << *result << endl;
+		}
+else 
+		{ cout << "No such entry!\n"; }
+}
+train train_station::search(int number){
+	num = number;
+	vector<train>::iterator itr;
+	itr = find_if(station.begin(), station.end(), [](train&x){return x.number = num; });
+	train temp(itr->number, itr->t_time.hour, itr->t_time.min, itr->depart_st);
+	return temp;
+}
+void train_station::clear()
+{
+	if (!station.empty())
+	{
+		station.clear();
+	}
+
+}
+bool comp_train(train&x, train&y){
+	if (x.t_time.hour < y.t_time.hour)
+		return true;
+	else if (x.t_time.hour == y.t_time.hour&&x.t_time.min < y.t_time.min)
+		return true;
+	else 
+		return false;
+
+}
+void train_station::sort_time(){
+	sort(station.begin(), station.end(),comp_train);
+	}
+
+//m menu code: 
+int menu(){
+	string header = "*****************************************************\n";
+	string footer = "*****************************************************\n";
+	string first = "Here's the automated train station management system\n";
+	string choices = "Please, press <1> if you want to add train\n Press<2> if you want to print\
+all entries\n Press<3> if you want to delete one entry\n Press <4> if you want to print one entry\n\
+ Press <5> if you want to search entry\nPress <5> if you want to sort entries by departure time\n\
+ Press <6> if you want to delete all entries\n";
+	cout << header << first << choices << footer;
+	int choice;
+	cin >> choice; cin.ignore();
+	return choice;
+}
+void select(int choice, train_station&obj){
+	int n, hr, min; string st;
+
+	switch (choice){
+	case 1: {
+				cout << "Enter train's number: "; cin >> n; cin.ignore(); cout << endl;
+				cout << "Enter time in format: hours<space> min: "; cout << endl;
+				cin >> hr >> min; cin.ignore();
+				cout << "Enter departure station: "; cout << endl;
+				getline(cin, st);
+				struct train temp(n, hr, min, st);
+				obj.push_back(temp); }
+			break;
+	case 2:
+	{
+			  obj.print_all();
+	}
+		break;
+	case 3:
+	{
+			  cout << "Please, enter train's number to delete: "; cout << endl;
+			  cin >> n; cin.ignore();
+			  struct train temp;
+			  temp=obj.pop(n);
+			  if (temp.number == 0) break;
+			  else { cout << "Deleted object: \n" << temp; }
+
+	}
+		break;
+	case 4:
+	{cout << "Please enter train's number to show: \n";
+	cin >> n; cin.ignore();
+	obj.print_one(n);
+		}
+		break;
+	case 5:
+	{
+			  obj.sort_time();
+	}
+		break;
+	case 6:{
+			   obj.clear();
+	
+	}
+		break;
+	default:cout << "Wrong choice! Please enter right choice...\n";
+		
+	}
+}
+
+main.cpp:
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+//#include <queue>
+////#include <deque>
+//#include <queue>
+//#include <list>
+#include <functional>
+#include <stdio.h>
+#include <string.h>
+//#include <cassert>
+//#include <set>
+#include "station.h"
+using namespace std;
+extern int num;
+
+int main(){
+
+	train_station A;
+	char cont = 'a';
+	while (true){
+		select(menu(), A);
+		cout << "If you want to quit, press <q>\n";
+		cin>>cont; cin.ignore();
+		if ((cont == 'q') || (cont == 'Q')) break;
+	} 
+		cout << "Good Bye\n";
+	system("pause");
+	return 0;
+
+}

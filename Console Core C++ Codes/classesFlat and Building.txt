@@ -1,0 +1,374 @@
+header.h:
+
+#pragma once
+
+#include< iostream>
+#include <string>
+using namespace std;
+
+class human{
+
+	char *name;
+	char*surname;
+	char*middle_name;
+	int age;
+	string tel;
+public:
+	human();
+	human(char *m_name, char * m_surname, char *m_middle_name, int m_age, string m_tel); 
+	char* getname();
+	char*getsurname();
+	int get_age();
+	void add();
+	void show();
+	human(const human&v);
+	human& operator=(const human&first);
+
+	~human(); 
+};
+
+class flat{
+	human*list;
+	int n_humans;
+	int f_number;
+	int rooms;
+public:
+	flat();
+	void add();
+	flat(flat&f);
+	~flat();
+	int get_rooms();
+	void del();
+	void show();
+	bool isEmpty();
+	void add_hum();
+	void del_hum();
+	int get_number();
+	flat& operator=(const flat&ft);
+	bool search_sname(char*m_sname);
+	bool search_age(int m_age);
+};
+
+
+class building{
+	flat*f_list;
+	int cap;
+	int year;
+	string address;
+	string osmd;
+public:
+	building();
+	//building(int _cap, int m_year, string m_address, string m_osmd);
+	~building();
+	void init();
+	building(building&b);
+	void f_search();
+	int getsize();
+	void get_flat(int num);
+	
+};
+
+realization.cpp:
+
+#include <iostream>
+#include <string>
+#include "header.h"
+using namespace std;
+
+human::human(){
+	name = new char[25];
+	name[0] = '\0';
+	surname = new char[25];
+	surname[0] = '\0';
+	middle_name = new char[25];
+	middle_name[0] = '\0';
+	int age = 0;
+	tel = "\0";
+}
+human::human(char *m_name, char * m_surname, char *m_middle_name, int m_age, string m_tel){
+	name = new char[25];
+	strcpy(name, m_name);
+	surname = new char[25];
+	strcpy(surname, m_surname);
+	middle_name = new char[25];
+	strcpy(middle_name, m_middle_name);
+	age = m_age;
+	tel = m_tel;
+}
+human::human(const human&v){
+	name = new char[25];
+	surname = new char[25];
+    middle_name = new char[25];
+	strcpy(name, v.name);
+	strcpy(surname, v.surname);
+	strcpy(middle_name, v.middle_name);
+	age = v.age;
+	tel = v.tel;
+}
+human::~human(){
+	delete[]name;
+	delete[]surname;
+	delete[]middle_name;
+}
+void human::add(){
+	char s_name[25];
+	char s_surname[25]; 
+	char s_middle_name[25]; 
+	cout<< "Enter dweller's name: "; cin >> s_name; cin.ignore();
+	strcpy(name, s_name);
+	cout<< "Enter dweller's surname: "; cin >> s_surname; cin.ignore();
+	strcpy(surname, s_surname);
+	cout<< "Enter dweller's middle-name: "; cin >> s_middle_name; cin.ignore();
+	strcpy(middle_name, s_middle_name);
+	cout<< "Enter age: "; cin >> age; cin.ignore();
+	cout<< "Enter telephone number: "; getline(cin, tel);
+	}
+human& human::operator=(const human&first){
+	strcpy(name, first.name);
+	strcpy(surname, first.surname);
+	strcpy(middle_name, first.middle_name);
+	age = first.age;
+	tel = first.tel;
+	return *this;
+	} 
+char* human::getname(){
+	return name;
+}
+void human::show(){
+	cout <<"Name: "<< name << "\n";
+	cout << "Surname: "<<surname << "\n";
+	cout << "Middle-name: "<<middle_name << "\n";
+	cout << "Age: "<< age << endl;
+	cout <<"telephone: "<< tel << endl;
+
+}
+char*human::getsurname(){
+	return surname;
+}
+int human::get_age(){ return age; }
+//all about flats:
+flat::flat(){
+	list = NULL;
+	n_humans = 0;
+	f_number = 0;
+	rooms = 0;
+}
+void flat::add(){
+	cout << "If flat is inhabited, enter number of inhabitants: ";
+	int temp;
+	cin >> n_humans;
+	if (n_humans > 0){
+		list = new human[n_humans];
+		for (int i = 0; i < n_humans; i++)
+		{
+			cout << "# " << i+1 << "dweller: \n";
+			list[i].add();
+
+		}
+	}
+	cout << "Enter flat number: "; cin >> f_number;
+	cout << "Enter # of rooms: "; cin >> rooms;
+
+}
+flat& flat::operator=(const flat&ft){
+	delete[] list;
+	n_humans = ft.n_humans;
+	list = new human[n_humans];
+	for (int i = 0; i < n_humans; i++){
+		list[i] = ft.list[i];
+	}
+	f_number = ft.f_number;
+	rooms = ft.rooms;
+	return *this;
+}
+void flat::show(){
+	cout << "Registered dwellers:\n";
+	for (int i = 0; i < n_humans; i++){
+		list[i].show();
+	
+	}
+	cout << endl;
+	cout << "Flat #: " << f_number;
+	cout << "\n# of Rooms: " << rooms;
+	cout << endl;
+}
+
+flat::flat(flat&f){
+	n_humans = f.n_humans;
+	f_number = f.f_number;
+	rooms = f.rooms;
+	list= new human[n_humans];
+	for (int i = 0; i < n_humans; i++){
+		list[i] = f.list[i];
+	}
+	
+}
+
+flat::~flat(){
+	if (list!=0)
+		delete[] list;
+}
+void flat::del_hum(){
+	char name[25];
+	human*temp = new human[n_humans - 1];
+	cout << "Enter name of inhabitant to delete: "; cin >> name; cin.ignore();
+	for (int i = 0; i < n_humans; i++){
+		if (!strcmp(list[i].getname(), name))
+			temp[i] = list[i];
+		}
+	delete[]list;
+	list = temp;
+	n_humans -= 1;
+}
+void flat::add_hum(){
+	char name[25];
+	human*temp = new human[n_humans + 1];
+	human h_tmp;
+	h_tmp.add();
+	for (int i = 0; i < n_humans+1; i++){
+		if (i < n_humans)
+		{
+			temp[i] = list[i];
+		}
+		else temp[i] = h_tmp;
+	}
+	delete[]list;
+	list = temp;
+	n_humans += 1;
+	}
+bool flat::isEmpty(){
+	if (list == NULL)
+		return true;
+	else return false;
+}
+int flat::get_rooms(){
+	return rooms;
+}
+int flat::get_number(){
+
+	return f_number;
+}
+bool flat::search_sname(char *n_sname){
+	bool tmp = false;
+	for (int i = 0; i < n_humans; i++){
+		if (strcmp(list[i].getsurname(), n_sname) == 0){
+			tmp=true;
+		}
+	}return tmp;
+}
+bool flat::search_age(int m_age){
+	bool tmp = false;
+	for (int i = 0; i < n_humans; i++){
+		if (list[i].get_age() == m_age){
+			tmp = true;
+		}
+	}return tmp;
+}
+
+building::building(){
+	cap = 0;
+	f_list = NULL;
+	year = 0;
+	address = "\0";
+	osmd = "\0";
+}
+
+void building::init(){
+	cout << "Please, enter building capacity: ";
+	cin >> cap; cin.ignore();
+	f_list = new flat[cap];
+	cout << "Please, enter each flat characteristics: ";
+	for (int i = 0; i < cap; i++){
+		cout <<"# "<< i+1 << " flat: \n";
+		f_list[i].add();
+	}
+	cout << "Please, enter construction year: "; cin >> year; cin.ignore();
+	cout << "Please, enter address: "; getline(cin, address);
+	cout << "Please,enter OSMD name: "; getline(cin, osmd);
+}
+building::~building(){
+	if (f_list!=0)
+		delete[] f_list;
+}
+building::building(building&b){
+	cap = b.cap;
+	f_list = new flat[cap];
+	for (int i = 0; i < cap; i++){
+		f_list[i] = b.f_list[i];
+		}
+	year = b.year;
+	address = b.address;
+	osmd = b.osmd;
+}
+
+void building::get_flat(int num){
+	for (int i = 0; i < cap;i++)
+	if (f_list[i].get_number() == num)
+		f_list[i].show();
+}
+void building::f_search(){
+	cout << "Enter parameters of search:";
+	cout << "\nIf by surname of dweller press<1> \
+	\t by age of dwellers: press <2>\n";
+	//by number of rooms press <3>\n ";
+	int choice;
+	cin >> choice; cin.ignore();
+	switch (choice){
+	case 1:{
+			   char d_name[25];
+			   cout << "Surname: "; cin >> d_name; cin.ignore();
+			   for (int i = 0; i < cap; i++){
+				   if (f_list[i].search_sname(d_name))
+					   f_list[i].show();
+
+
+			   }
+			   break; }
+	case 2:{int tmp_age;
+		cout << "Age: "; cin >> tmp_age; cin.ignore();
+		for (int i = 0; i < cap; i++){
+			if (f_list[i].search_age(tmp_age)){
+				f_list[i].show();
+			}
+
+		}
+
+		break; }
+			  
+	}
+
+	}
+
+	int building::getsize(){
+		return cap;
+	
+	}
+
+main.cpp:
+
+#include <iostream>
+#include <string>
+#include "header.h"
+
+using namespace std;
+
+int main()
+{
+	building a;
+	cout << "Please, enter information about the building:\n";
+	a.init();
+	int number;
+	cout << "\n Enter # of flat to see information about: "; cin >> number; cin.ignore();
+	a.get_flat(number);
+	char choice;
+	cout << "If you want to search building by specific info, press <y>\n";
+	cin >> choice; cin.ignore();
+	if (choice == 'y'){
+		a.f_search();
+	}
+	 
+	
+	system("pause");
+	return 0;
+}
+

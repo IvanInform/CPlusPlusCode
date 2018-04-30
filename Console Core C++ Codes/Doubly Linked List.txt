@@ -1,0 +1,315 @@
+#pragma once;
+#include <iostream>
+
+using namespace std;
+class ArrayException
+{
+private:
+	string m_error;
+public: 
+	ArrayException(string error) :
+		m_error(error){}
+	const char* getError(){ return m_error.c_str(); }
+};
+template <typename T>
+struct Node{
+	T data;
+	Node<T>*next;
+	Node<T>*prev;
+};
+template <class T>
+class Queue {
+	Node<T> *head, *tail;
+	int count; int maxcount;
+public:
+	Queue();
+	Queue(int max);
+	Queue(const Queue<T>&obj);
+	~Queue();
+	void enqueue(T value);
+	T dequeue();
+	void Clear();
+	bool isEmpty();
+	bool isFull();
+	int GetCount();
+	Node<T>* newnode(T k){
+		Node<T> *temp = new Node<T>;
+		temp->data = k;
+		temp->next = NULL; temp->prev = NULL;
+		return temp;
+	}
+	void Show();
+	int getcount()const;
+	int getmax() const;
+	void setmax(int);
+	Queue<T>& operator= (const Queue<T>obj);
+	Queue<T> operator+ (const Queue<T> obj);
+	Queue<T> operator *(const Queue<T> obj);
+	void AddTail(T value);
+	bool compare(T value)const;
+	T getValue(int)const;
+};
+template<typename T>
+T Queue<T>::getValue(int index)const{
+	try {
+		if (count == 0){
+			throw ArrayException("QueueEmptyError!!!");
+			return -1;
+		}
+
+		else if (index<0 || index>count)
+		{
+			throw ArrayException("OutofBoundaryError!");
+			return -1;
+		}
+		else {
+			Node<T>*current = head;
+			for (int i = 0; i < index; i++)
+			{
+				current = current->next;
+			}
+			return current->data;
+		}
+	}
+	catch (ArrayException&obj) { cout << "Exception occured: " << obj.getError(); }
+}
+template <typename T>
+void Queue<T>::setmax(int value){
+	try {
+		if (value <0)
+			throw ArrayException("ZeroMaxValueError!!!");
+		else if (value>100)
+		{
+			throw ArrayException("OutofBoundsMaxValue!!!");
+		}
+		else { maxcount = value; }
+	}
+	catch (ArrayException&obj) { cout << "Exception occured: " << obj.getError(); }
+}
+template <typename T>
+bool Queue<T>::compare(T value)const{
+	Node<T>*current = head;
+	while (current != NULL)
+	{
+		if (current->data == value)
+		{
+			return true;
+		}current = current->next;
+	} return false;
+}
+template <typename T>
+void Queue<T>::AddTail(T value){
+	try {
+		if (isFull()){
+			throw ArrayException("QueueIsFullError!!!"); return;
+		}
+	}
+	catch (ArrayException&obj) { cout << "Exception occured: " << obj.getError(); }
+		
+	Node<T>*temp = head;
+	Node<T>* newNode = newnode(value);
+	if (head == NULL){
+		head = tail = newNode; count++;
+		return;
+	}
+	while (temp->next != NULL)
+		temp = temp->next;
+	tail = temp->next = newNode;
+	newNode->prev = temp; count++;
+}
+template <typename T>
+Queue<T>::Queue() :count(0), maxcount(25){
+	head = tail = NULL;
+}
+template <typename T>
+Queue<T>::Queue(int max) : count(0), maxcount(max){
+	head = tail = NULL;
+}
+template <typename T>
+Queue<T>::~Queue(){
+	if (count != 0){
+		Clear();
+	}
+}
+template <typename T>
+int Queue<T>::getcount()const{
+	return count;
+}
+template <typename T>
+int Queue<T>::getmax()const{
+	return maxcount;
+}
+template <typename T>
+Queue<T>::Queue(const Queue<T>&obj){
+	count = 0; maxcount = obj.getmax();
+	head = tail = NULL;
+	for (int i = 0; i < obj.getcount(); i++)
+	{
+		AddTail(obj.getValue(i));
+	}
+
+}
+template <typename T>
+void Queue<T>::enqueue(T value){
+	try {
+		if (count == maxcount){
+			throw ArrayException("MaxBoundaryError!!!");
+			return;
+		}
+	}
+	catch (ArrayException&obj) { cout << "Exception occured: " << obj.getError(); }
+	Node<T>*temp = newnode(value);
+	if (head != NULL){
+		head->prev = temp;
+		temp->next = head;
+	}
+	if (count == 0){
+		head = tail = temp; 
+	}
+	else head = temp;
+	count++;
+}
+template <typename T>
+T Queue<T>::dequeue(){
+	
+	try {
+		if (count == 0)
+		{
+			throw ArrayException("QueueEmptyError!!!"); //return NULL;
+		}
+	}
+	catch (ArrayException&obj){ cout << "Exception occured: " << obj.getError(); }
+	//else {
+	if (count == 1)
+	{
+		Node<T>* temp = head;
+		T deleted = temp->data;
+		head = tail = NULL;
+		delete temp; count--; return deleted;
+	}
+	else {
+		T temp;
+		temp = tail->data;
+		Node<T>* current = tail;
+		tail = current->prev;
+		tail->next = NULL;
+		delete current; count--;
+		//}
+		return temp;
+	}
+}
+template<typename T>
+void Queue<T>::Clear(){
+	try {
+		if (count == 0){
+			throw ArrayException("DeleteEmptyQueueError!!!");
+		}
+	}
+	catch (ArrayException&obj){ cout << "Exception occured: " << obj.getError(); }
+	Node<T>*del = head;
+	while (del != NULL)
+	{
+		head = head->next;
+		delete del;
+		del = head;
+	}
+	tail = head = NULL;
+}
+template<typename T>
+bool Queue<T>::isEmpty(){
+	return count == 0;
+}
+template<typename T>
+bool Queue<T>::isFull(){
+	return count == maxcount;
+}
+template <typename T>
+int Queue<T>::GetCount(){
+	return count;
+}
+template<typename T>
+void Queue<T>::Show(){
+	try {
+		if (count == 0)
+		{
+			throw ArrayException("PrintEmptyError!!!");
+		}
+	}
+	catch (ArrayException&obj){ cout << "Exception occured: " << obj.getError(); }
+
+	/*if (!(isEmpty()))
+	{*/
+		Node<T>*current = head;
+		int out = 0;
+		while (current != 0)
+		{
+			cout << current->data << " ";
+			out++;
+			if ((out % 10) == 0)
+			{
+				cout << endl;
+			}current = current->next;
+		}cout << endl;
+	//}
+	
+
+}
+template<typename T>
+Queue<T>& Queue<T>::operator=(const Queue<T>obj){
+	if (this == &obj)
+		return *this;
+	Clear();
+	Node<T>*temp = obj.head;
+	while (temp != 0){
+		AddTail(temp->data);
+		temp = temp->next;
+	}return *this;
+}
+template <typename T>
+Queue<T> Queue<T>::operator +(const Queue<T> obj)
+{
+	Queue<T> result(*this);
+	Node<T>*temp = obj.head;
+	while (temp != 0)
+	{
+		result.AddTail(temp->data);
+		temp = temp->next;
+	}
+	return result;
+}
+template <typename T>
+Queue<T> Queue<T>::operator *(const Queue<T> obj){
+	Queue<T> result(obj); result.setmax(maxcount + obj.getmax());
+	Node <T>*current = head;
+	int i = 0;
+	while (current != NULL)
+	{
+		if (obj.compare(current->data)) { current = current->next; continue; }
+		else { result.enqueue(current->data); current = current->next; }
+	}
+
+	return result;
+}
+
+main.cpp:
+#include <iostream>
+#include "inheritance.h"
+using namespace std;
+
+int main(){
+	Queue<int>one;
+	one.enqueue(5);one.dequeue();
+	cout << "Check exception class in show():" << endl;
+	one.Show();
+	cout << "Check exception class in enqueue over max_count:" << endl;
+	for (int i = 0; i < one.getmax(); i++)
+	{
+		one.enqueue(i + 1);
+	}
+	one.enqueue(10);
+	cout << "Check exception for index value: " << endl;
+	one.getValue(100);
+	
+	system("pause");
+	return 0;
+}

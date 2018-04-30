@@ -1,0 +1,286 @@
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <string.h>
+//#include <queue>
+////#include <deque>
+#include <queue>
+#include <list>
+#include <functional>
+//#include <cassert>
+#include <set>
+using namespace std;
+/*
+Реализуйте программу, которая предоставляет функциональ-
+ность по работе с файлами. Приложение получает у пользовате-
+ля путь к файлу, после чего программа отображает интерфейс по
+анализу содержимого файла.
+Возможности интерфейса:
+Поиск заданной строки (по итогам показывать статистику
+поиска строки по всему файлу);
+Замена строки на новую строку (по итогам показать статисти-
+ку по замене строки);
+Отображение файла на экран;
+Переворот содержимого файла.
+Используйте для работы с файлами потоки, а для работы со
+строками класс string.
+*/
+//take some file
+class files_work{
+	string file;
+	vector<string>myvector;
+	/*ofstream outfile(file, ios::out);
+	ifstream infile(file, ios::in);*/
+public:
+	files_work();
+	files_work(string&);
+	~files_work();
+	files_work(const files_work&obj);
+	void search_st(string&st);
+	void replace_st(string&, string&);
+	void print();
+	string getfile()const{
+		return file;
+	}
+	void reverse();
+};
+int menu(){
+	string header = "**********************************************************\n";
+	string footer = "**********************end*********************************";
+	string menu_list = "Here's the program to work with files:\nChoose options:Press<1> to search for string instances;\n\
+Press<2> to replace string with another string\n Press<3> to show file contents\n\
+Press<4> to reverse file contents(strings before \n)";
+	cout << header << menu_list << footer << endl;
+	int choice;
+	cin >> choice; cin.ignore();
+	return choice;
+}
+void select(int choice, files_work&obj){
+
+	switch (choice)
+	{
+	case 1:{
+			   cout << "Enter string to search for\n";
+			   string temp;
+			   getline(cin, temp);
+			   obj.search_st(temp);
+	}
+		break;
+	case 2:{
+			   cout << "Enter string to be replaced: \n";
+			   string temp;
+			   getline(cin, temp);
+			   cout << "Enter substitute: \n";
+			   string rep;
+			   getline(cin, rep);
+			   obj.replace_st(temp, rep);
+	}
+		break;
+	case 3:{
+	
+			   obj.print();
+	}
+		break;
+	case 4:
+	{obj.reverse();
+	
+	}
+		break;
+	default:cout << "You entered wrong choice, prese retry!" << endl;
+	}
+
+
+}
+static string searched;
+
+
+files_work::files_work(){
+	file = "example.txt";
+}
+files_work::files_work(string& obj){
+	file = obj;
+}
+files_work::~files_work(){}
+files_work::files_work(const files_work&obj){
+	file = obj.getfile();
+}
+void files_work::print(){
+	if (!myvector.empty()) myvector.clear();
+	ifstream infile(file.c_str(), ios::in);
+	if (!infile.is_open())
+	{
+		cerr << "ErrorOpeningFile!\n";
+		exit(-1);
+	}
+	infile.seekg(0, ios::beg);
+	string st;
+	int i = 0;
+	while (getline(infile, st, '\n'))
+	{
+		if (st[0] != 0)
+		{
+			myvector.push_back(st);
+			i++;
+		}
+
+	}
+	infile.close();
+	copy(myvector.begin(), myvector.end(), ostream_iterator<string>(cout, "\n"));
+
+}
+void files_work::search_st(string&search_st){
+	if (!myvector.empty()) myvector.clear();
+	ifstream infile(file.c_str(), ios::in);
+	if (!infile.is_open())
+	{
+		cerr << "ErrorOpeningFile!\n";
+		exit(-1);
+	}
+	infile.seekg(0, ios::beg);
+	string st;
+	while (getline(infile, st, '\n'))
+	{
+		if (!st.empty())
+		{
+			myvector.push_back(st);
+		}
+	}
+	searched=search_st;
+	vector<string>second_vector;
+	vector<string>::iterator start = myvector.begin();
+	vector<string>::iterator stop = myvector.end();
+	while (start != myvector.end()){
+		start = find_if(start, myvector.end(), [](string&x){return strstr(x.c_str(), searched.c_str()) != NULL; });
+		if (start != stop)
+		{
+			second_vector.insert(second_vector.begin(), *start);
+		}
+		start++;
+	}
+	cout << "Searched for string occures " << second_vector.size() << endl;
+	copy(second_vector.begin(), second_vector.end(), ostream_iterator<string>(cout, "\n"));
+	cout << endl;
+	}
+
+void files_work::replace_st(string&searched_for, string&replaceable){
+	if (!myvector.empty()) myvector.clear();
+	ifstream infile(file.c_str(), ios::in);
+	if (!infile.is_open())
+	{
+		cerr << "ErrorOpeningFile!\n";
+		exit(-1);
+	}
+	infile.seekg(0, ios::beg);
+	string st;
+	while (getline(infile, st, '\n'))
+	{
+		if (!st.empty())
+		{
+			myvector.push_back(st);
+		}
+	}
+	infile.close();
+	searched = searched_for;
+	vector<string>second_vector;
+	vector<string>::iterator start = myvector.begin();
+	vector<string>::iterator stop = myvector.end();
+	while (start != myvector.end()){
+		start = find_if(start, myvector.end(), [](string&x){return strstr(x.c_str(), searched.c_str()) != NULL; });
+		if (start != stop){
+			string temp = *start;
+			size_t it = temp.find(searched);
+			temp.replace(it, replaceable.size(), replaceable);
+			*start = temp;
+		}
+		start++;
+	}
+	cout << "Here's strings found with text and replaced: " << endl;
+	copy(myvector.begin(), myvector.end(), ostream_iterator<string>(cout, "\n"));
+	cout << endl;
+	ofstream outfile("example1.txt", ios::out);
+	if (!outfile)
+	{
+		cerr << "ErrorOpeningFile!\n";
+		exit(-1);
+	}
+	vector<string>::iterator itr = myvector.begin();
+	while (itr != myvector.end())
+	{
+		outfile << *itr << endl;
+		itr++;
+	}
+
+	outfile.close();
+
+}
+void files_work::reverse(){
+	if (!myvector.empty()) myvector.clear();
+	ifstream infile(file.c_str(), ios::in);
+
+	if (!infile.is_open())
+	{
+		cerr << "ErrorOpeningFile!\n";
+		exit(-1);
+	}
+
+	infile.seekg(0, ios::beg);
+	string st;
+	int i = 0;
+	while (getline(infile, st, '\n'))
+	{
+		if (!st.empty())
+		{
+			myvector.push_back(st);
+			i++;
+		}
+	}
+	vector<string>::reverse_iterator itr = myvector.rbegin();
+	while (itr != myvector.rend())
+	{
+		/*string temp = *itr;
+		copy(temp.rbegin(), temp.rend(), ostream_iterator<char>(cout)); cout << endl;
+		itr++;*/
+		cout << *itr++ << endl;
+	}
+	infile.close();
+}
+main.cpp:
+
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <fstream>
+//#include <queue>
+////#include <deque>
+//#include <queue>
+//#include <list>
+#include <functional>
+#include <stdio.h>
+#include <string.h>
+//#include <cassert>
+//#include <set>
+#include "files.h"
+using namespace std;
+extern string searched;
+
+int main(){
+	cout << "Enter file name:" << endl;
+	string filename;
+	getline(cin, filename);
+	files_work A(filename);
+	char w_end = 'a';
+	while (true){
+	select(menu(), A);
+	cout << "What to continue press a key, otherwise press <q>" << endl;
+	cin >> w_end; cin.ignore();
+	if (w_end == 'q') break;
+		}
+	system("pause");
+	return 0;
+
+}

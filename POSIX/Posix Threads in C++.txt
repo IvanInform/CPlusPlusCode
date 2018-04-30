@@ -1,0 +1,194 @@
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <pthread.h>
+
+using namespace std;
+/*Розробити програму, яка використовуючи потоки POSIX буде паралельно зчитувати дані із 
+заданого переліку джерел даних та обчислювати їх кількісні характеристики. Для цього 
+необхідно заздалегідь підготувати файли з текстовою та чисельною інформацію. Потоки, 
+що оброблюють текстові файли повинні обчислити статистику цих файлів (кількість символів, 
+слів, знаків пунктуації, абзаців тощо). Потоки, що оброблюють числову інформацію відповідні 
+статистичні дані для числових рядів (середнє, максимальне та мінімальне значення, кількість 
+додатних і від'ємних чисел тощо). Кожен потік після завершення роботи повинен опублікувати 
+на екрані повідомлення з обчисленною інформацією.*/
+#define NUM_THREADS 2
+
+struct result{
+	int count;
+	int punct;
+	int paragraph;
+	int symbol;
+	
+};
+struct num_result{
+	int mid;
+	int max;
+	int min;
+	int negative;
+	int positive;
+
+};
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+ void *Printstrstat(void *t) { 
+	 string line;
+	 result res = {0,0,0,0};
+	int len = strlen((char*)t);
+	char *str = new char[len + 1];
+	strcpy(str, (char*)t);
+	fstream fs(str, std::fstream::in);
+	if (!fs.is_open())
+	{
+		cout << "unable to open file" << str;
+		exit(-1);
+	}
+	char c;	
+	
+	while (getline(fs,line))
+	{
+		stringstream ss(line);
+		if (line.empty())
+		{
+			res.paragraph++; 
+		}
+		char n;
+		while (ss.get(n)){
+			if (isalnum(n))
+			{
+				res.symbol++;
+			}
+		if (isblank(n)){
+			res.count++;
+		}
+		if (ispunct(n)){
+			res.punct++;
+		
+		}
+		
+		
+		}
+
+	} 
+	
+pthread_mutex_lock(&mutex);
+    cout << "Total number of symbols in " << str << " is " << res.symbol << endl;
+	cout << "Average number of punctuation signs in"<<str<<" is " << res.punct << endl;
+	cout << "number of spaces is " << res.count << endl;
+	cout << "number of paragraphs is " << res.paragraph << endl;
+	fs.close();
+	pthread_mutex_unlock(&mutex);
+	pthread_exit(NULL);
+	return NULL;
+}
+ bool isNegative(int i){ return (i < 0); }
+ bool isPositive(int i){ return (i >= 0); }
+
+ void *PrintNumStat(void *t) {
+	 string line;
+	 int sum = 0;
+	 vector<int>num_vector;
+	 num_result resNum = { 0, 0, 0,0,0 };
+	 int len = strlen((char*)t);
+	 char *str = new char[len + 1];
+	 strcpy(str, (char*)t);
+	 fstream fs(str, std::fstream::in);
+	 if (!fs.is_open())
+	 {
+		 cout << "unable to open file" << str;
+		 exit(-1);
+	 }
+	 char c;
+int number;
+
+	 while (getline(fs, line))
+	 {
+		 stringstream ss(line);
+		 	 
+		while (ss>>number){
+			num_vector.push_back(number);
+
+			 }
+
+		 }
+
+	 
+	vector<int>::iterator itr= min_element(num_vector.begin(), num_vector.end());
+	resNum.min = *itr;
+	itr = max_element(num_vector.begin(), num_vector.end());
+	resNum.max = *itr;
+	resNum.negative = count_if(num_vector.begin(), num_vector.end(), isNegative);
+	resNum.positive = count_if(num_vector.begin(), num_vector.end(), isPositive);
+	for (auto&x : num_vector)
+	{
+		sum += x;
+	}
+
+ /*середнє, максимальне та мінімальне значення, кількість
+ додатних і від'ємних чисел тощо*/
+	 pthread_mutex_lock(&mutex);
+	 cout << "Average number in "<<str<<" is " <<resNum.mid  << endl;
+	 cout << "Maximum number in "<<str<<" is " <<resNum.max << endl;
+	 cout << "Number of positive integers in "<<str<<" is " << resNum.positive<< endl;
+	 cout << "Number of negative integers in "<<str<<" is " << resNum.negative << endl;
+	 cout << "The average number in "<<str<<" is " <<sum/num_vector.size()<< endl;
+
+	 fs.close();
+	 pthread_mutex_unlock(&mutex);
+	 pthread_exit(NULL);
+	 return NULL;
+ }
+
+int main() {
+	pthread_t tid1;
+	pthread_t tid2;
+	pthread_t did1;
+	pthread_t did2;
+	int rc;
+	int rb;
+	int dc;
+	int db;
+	int i;
+	pthread_attr_t attr;
+	void *status;
+	char* file1 = "test.txt";
+	char* file2 = "test2.txt";
+	char* file3 = "number.txt";
+	char *file4 = "number2.txt";
+
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	rc = pthread_create(&tid1, &attr, Printstrstat, (void *)file1);
+		if (rc) {
+			cout << "Error:unable to create thread," << rc << endl;
+			exit(-1);
+		}
+		rb = pthread_create(&tid2, &attr, Printstrstat, (void *)file2);
+		if (rb) {
+			cout << "Error:unable to create thread," << rb << endl;
+			exit(-1);
+		}
+		dc = pthread_create(&did1, &attr, PrintNumStat, (void *)file3);
+		if (rc) {
+			cout << "Error:unable to create thread," << rc << endl;
+			exit(-1);
+		}
+		db = pthread_create(&did2, &attr, PrintNumStat, (void *)file4);
+		if (rb) {
+			cout << "Error:unable to create thread," << rb << endl;
+			exit(-1);
+		}
+	
+		pthread_attr_destroy(&attr);
+		 pthread_join(tid1, &status);
+		 pthread_join(tid2, &status);
+		 pthread_join(did1, &status);
+		 pthread_join(did2, &status);
+			
+				cout << "Main: program exiting. " << endl;
+				pthread_mutex_destroy(&mutex);
+		system("pause");
+	}

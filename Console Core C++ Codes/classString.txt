@@ -1,0 +1,223 @@
+header.h
+
+#pragma once
+#include <iostream>
+using namespace std;
+class mystring{
+	char* str;
+	int length;
+
+public:
+	mystring();//create string 80 symbols long;
+	mystring(int l);//create string with length l
+	mystring(const char*a);
+	mystring(const mystring & a);
+	~mystring();
+	int size();//returns string length
+	char& at(int p);// returns char by index but check for outofrange problem if too high index
+	bool isempty();
+	friend void swap(mystring& first, mystring&second);//swaps string from *this to a
+	char* find(const mystring& a); //looks
+	mystring substr(int pos, int n);//returns string after index pos to nth symbol
+	char* getstr(){ return str; }
+	friend ostream& operator<<(ostream& out, mystring &a);
+	friend istream& operator>>(istream & in, mystring &a);
+	mystring& operator = (const mystring& a);//if A and B are object B is "neil", the A =B therefore A is "neil"
+	mystring& operator+=(const mystring&a); 
+	friend  bool operator ==(const mystring& first, const mystring & second);// checks if both strings are equal
+	friend mystring operator+(const mystring&first, const mystring & second);
+	friend bool operator==(const mystring&a, const mystring& b);
+	friend bool operator!=(const mystring&, const mystring&);
+	friend bool operator>(const mystring&, const mystring&);
+	friend bool operator>=(const mystring&, const mystring&);
+	friend bool operator<(const mystring&, const mystring&);
+	friend bool operator<=(const mystring&, const mystring&);
+		};
+
+main.cpp:
+#include <iostream>
+#include <string.h>
+#include "string.h"
+
+using namespace std;
+
+int main(){
+	
+	cout << "Now we are going to test our class mystring:\n\
+				I will introduce each function..." << endl;
+
+	cout << "Create a string...\n"; mystring a, b, d("hello");
+	cout << "Show strings: ";
+	cout << a << b << "  " << d;
+	cout << "\nInitialize strings:\n"; mystring c; cin >> c;
+	cout << "And show input: "; cout << c;
+	cout << "Copy constructor: "; mystring h(c); cout << h; cout << endl;
+	cout << "[] function: "; cout << c.at(2); cout << endl;
+	a = c; cout << a << endl;
+	cout << "swap function: ";
+	swap(c, d); cout << c << endl;
+	cout << "find function: "; mystring m("hello this wonderfull world!"); mystring g("world");
+	char *pt = m.find(g); cout << pt;
+	cout << "\n Operator+=: "; mystring i("Ivan"); mystring j(" Yurow"); i += j;
+	cout << i;
+	cout << "Operator >: "; mystring k("ivan"); mystring l("Ivan");
+	if (k > l)
+	{
+		cout << "k is bigger";
+	}
+	else {
+		cout << "k is lesser";
+	}
+
+	system("pause");
+	return 0;
+}
+
+realization.cpp:
+
+#include <iostream>
+#include <string>
+#include "string.h"
+
+using namespace std;
+
+mystring::mystring():length(80){
+	str = new char[80];
+	str[0] = '\0';
+}
+mystring::mystring(int l) : length(l){
+	str = new char[l];
+	str[0] = '\0';
+}
+mystring::mystring(const char*a){
+	str = new char[strlen(a) + 1];
+	strcpy(this->str, a);
+	length = strlen(this->str) + 1;
+
+}
+mystring::mystring(const mystring& a){
+	int n = strlen(a.str)+1;
+	str = new char[strlen(a.str) + 1];
+	strncpy(str, a.str, n);
+	length = strlen(a.str) + 1;
+}
+mystring::~mystring(){
+	delete[] str;
+}
+int mystring::size(){
+	int len = 0;
+	char*pt = &str[0];
+	while (pt != '\0'){
+		len++;
+			}
+	return len;
+	}
+char& mystring::at(int p){
+	char pt; pt = ' ';//to return some char
+	return (p >= 0 && p < strlen(str)) ? str[p] : pt;
+
+}
+bool mystring::isempty(){
+	if (str[0] == '\0')
+		return true;
+	else
+		return false;
+
+}
+void swap(mystring& a, mystring&b){
+	int size = strlen(a.str) + 1;
+	int size2 = strlen(b.str) + 1;
+	char *temp = new char[size];
+	char *temp2 = new char[size2];
+	strcpy(temp, a.str);
+	strcpy(temp2, b.str);
+	delete[] a.str;
+	delete[] b.str;
+	a.str = temp2;
+	b.str = temp;
+}
+char* mystring::find(const mystring& a){
+	char*pt=NULL;
+	pt = strstr(str, a.str);
+	return pt;
+}
+mystring mystring::substr(int pos, int n){
+	int size = strlen(str) + 1;
+	char*temp = new char[size];
+	for (int i = pos; i < (pos+n)&&i<size; i++)
+	{
+		temp[i] = str[i];
+	}
+	str = temp; length = (n - pos) + 1; str[length] = '\0';
+	return *this;
+}
+
+ostream& operator<<(ostream& out, mystring &a){
+	out << a.getstr();
+	 return out;
+}
+istream& operator >> (istream & in, mystring &a){
+	
+	char *pt=new char[80];
+	in.getline(pt, 80);
+	//in >> val;
+	a.length = strlen(pt)+1;
+	a.str = new char[a.length];
+	strcpy(a.str, pt);
+	return in;
+	
+	
+}
+mystring& mystring::operator=(const mystring& a)
+{
+	if (this != &a)
+	{
+		int len = strlen(a.str) + 1;
+		delete[] this->str;
+		this->str = new char[len];
+		strcpy(this->str, a.str); //str[len] = '\0';
+	}
+	return *this;
+}
+mystring& mystring::operator+=(const mystring&a){
+	int size = strlen(str) + strlen(a.str);
+	char*temp = new char[size+1];
+	length = size + 1;
+	for (int i = 0; i < strlen(this->str); i++)
+	{
+		temp[i] = this->str[i];
+	}
+	for (int i = (strlen(this->str)), j = 0; i < size; i++, j++)
+	{
+		temp[i] = a.str[j];
+	}temp[size] = '\0';
+	this->str = temp;
+	return *this;
+}
+bool operator ==(const mystring& first, const mystring & second)
+{
+	
+	return strcmp(first.str, second.str);
+}
+mystring operator+(mystring&first, const mystring & second)
+{
+	mystring a = first;
+	return first += second;
+}
+bool operator>(const mystring&a, const mystring&b)
+{
+	return (strlen(a.str)) > (strlen(b.str)) ? true : false;
+}
+bool operator>=(const mystring&a, const mystring&b)
+{
+	return (strlen(a.str)) >= (strlen(b.str)) ? true : false;
+}
+bool operator<(const mystring&a, const mystring&b)
+{
+	return (strlen(a.str)) < (strlen(b.str)) ? true : false;
+}
+bool operator<=(const mystring&a, const mystring&b)
+{
+	return (strlen(a.str)) <= (strlen(b.str)) ? true : false;
+}
+

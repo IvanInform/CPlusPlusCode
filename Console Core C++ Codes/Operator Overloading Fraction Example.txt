@@ -1,0 +1,198 @@
+#pragma once;
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+
+
+using namespace std;
+
+
+class fraction{
+private:
+	int numer;
+	int denom;
+
+public:
+	fraction() :numer(0), denom(1){};
+	fraction(int x, int y);
+	void setfraction(int x, int y);
+	void setnumer(int);
+	void setdenom(int);
+	fraction operator+(const fraction r);
+
+	fraction operator-(const fraction r);
+
+	fraction operator/(const fraction r);
+
+	fraction operator*(const fraction& right);
+	friend istream& operator>>(istream &t, fraction &a);
+	int get_denom();
+
+	int gcd(int x, int y){
+
+		if (y == 0)
+			return x;
+		else
+			return gcd(y, x%y);
+	}
+	void reduce();
+	friend ostream& operator<<(ostream &t, const fraction &right);
+	fraction operator*(const int &b);
+	friend fraction operator*(int &a, const fraction &b);
+	void reduce(fraction &c);
+	void save(char*filename);
+	void read(char*filename);
+
+	~fraction();
+};
+void fraction::setnumer(int numer){ this->numer = numer; }
+void fraction::setdenom(int denom){ this->denom = denom; }
+fraction::fraction(int x, int y):numer(x), denom(y){
+	try {
+		if (denom == 0)
+		{
+			throw "divide by zero error";
+		}
+		
+	}
+	catch (const char *e){ cout << "exception occurred " << endl << e; }
+}
+
+fraction::~fraction(){};
+void fraction::setfraction(int x, int y){
+
+	if (y == 0)
+		throw "divide by zero error";
+	denom = y;
+	numer = x;
+}
+fraction fraction::operator+(const fraction r){
+	fraction b;
+	b.numer = (numer*r.denom) + (r.numer*denom);
+	b.denom = denom*r.denom;
+	reduce(b);
+	return b;
+}
+
+
+fraction fraction::operator-(const fraction r){
+	fraction b;
+	b.numer = (numer*r.denom) - (r.numer*denom);
+	b.denom = denom*r.denom;
+	reduce(b);
+	return b;
+
+}
+fraction fraction::operator/(const fraction r){
+	fraction b;
+	b.numer = numer*r.denom;
+	b.denom = denom*r.numer;
+	reduce(b);
+	return b;
+
+}
+fraction fraction::operator*(const fraction& right){
+	fraction c;
+	c.numer = numer* right.numer;
+	c.denom = denom*right.denom;
+	reduce(c);  return c;
+}
+fraction fraction::operator*(const int &b)
+{
+	fraction c;
+	c.numer = numer*b;
+	c.denom = denom;
+	reduce(c);  return c;
+}
+
+void fraction::reduce(){
+	int t = ((numer > denom)) ? gcd(numer, denom) : gcd(denom, numer);
+	numer /= t; denom /= t;
+
+}
+void fraction::reduce(fraction &c)
+{
+	int t = ((c.numer>c.denom) ? gcd(c.numer, c.denom) : gcd(c.denom, c.numer));
+	c.numer /= t;  c.denom /= t;
+}
+istream& operator>>(istream&in, fraction&right)
+{
+	char s;
+	in >> right.numer;  in >> s;  in >> right.denom;
+	right.reduce();
+	return in;
+}
+ostream& operator<<(ostream &out, const fraction &right)
+{
+	out << right.numer << "/" << right.denom;
+	return out;
+
+}
+int fraction::get_denom(){
+
+	return denom;
+}
+fraction operator*(int &a, const fraction &b)
+{
+	fraction c;
+	c.numer = a*b.numer;
+	c.denom = b.denom;
+	c.reduce();  return c;
+}
+
+void fraction::save(char* filename){
+	ofstream outfile(filename, ios_base::out);
+	if (!outfile.is_open())
+	{
+		cerr << "Error opening file";
+		exit(EXIT_FAILURE);
+	}
+
+	outfile << numer << "\n" << denom;
+
+}
+void fraction::read(char* filename){
+	
+	ifstream infile(filename, ios_base::in);
+	if (!infile.is_open()){
+		cerr << "Error opening file!";
+		exit(EXIT_FAILURE);
+
+	}
+	int count = 1;
+	char str[25];;
+	while (!infile.eof())
+	{
+
+		infile.getline(str, 25);
+		if (((count)%2)!=0)
+			setnumer(atoi(str));
+		else
+			setdenom(atoi(str));
+		count++;
+	}
+
+	infile.close();
+
+}
+main.cpp:
+
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <string.h>
+#include "student_file.h"
+
+using namespace std;
+
+int main()
+{
+	fraction a(5,10), b;
+	a.save("fraction.txt");
+	b.read("fraction.txt");
+	cout << b;
+	system("pause");
+	return 0;
+}

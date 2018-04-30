@@ -1,0 +1,170 @@
+#pragma once;
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+
+using namespace std;
+class Student{
+	char name[25];
+	char surname[25];
+	char **classes;
+	int year_enroll;
+	int age;
+public:
+	Student();
+	Student(char* name, char* surname, char **m_class, int year, int age);
+	~Student();
+	char* getname();
+	char* getsurname();
+	char** getclasses();
+	int getyear_enroll();
+	int getage();
+	friend ostream& operator<<(ostream&out, Student&obj);
+	void set_student();
+	void save(char* filename);
+	void read(char* filename);
+
+};
+Student::Student() :year_enroll(1999), age(0){
+	strcpy(name, "ivan");
+	strcpy(surname, "ivanov");
+	classes = new char*[5];
+	for (int i = 0; i < 5; i++)
+	{
+		classes[i] = new char[25];
+		strcpy(classes[i], "english");
+	}
+
+}
+
+Student::Student(char* name, char *surname, char **m_class, int year, int age){
+	strcpy(this->name, name);
+	strcpy(this->surname, surname);
+	classes = new char*[5];
+	for (int i = 0; i < 5; i++)
+	{
+		classes[i] = new char[25];
+		strcpy(classes[i], m_class[i]);
+	}
+	this->year_enroll = year;
+	this->age = age;
+}
+
+Student::~Student(){
+	if (classes != NULL)
+	{
+		for (int i = 0; i < 5; i++)
+			delete classes[i];
+		delete[] classes;
+	}
+
+}
+char* Student::getname(){
+	return name;
+}
+char* Student::getsurname(){
+	return surname;
+}
+char** Student::getclasses(){
+	return classes;
+}
+int Student::getyear_enroll(){
+	return year_enroll;
+}
+int Student::getage(){
+	return age;
+}
+ostream& operator<<(ostream&out, Student&obj){
+	out << "Name: " << obj.getname() << "Surname: " << obj.getsurname() << endl;
+	out << "Year enrolled: " << obj.getyear_enroll() << "Age: " << obj.getage() << endl;
+	char**temp = obj.getclasses();
+	for (int i = 0; i < 5; i++)
+	{
+		out << "Class #" << i << " " << temp[i] << endl;
+	}
+	return out;
+}
+void Student::set_student(){
+	cout << "Enter name: ";
+	char temp[25];
+	cin.get(temp, 25); cin.ignore();
+	strcpy(this->name, temp);
+	cout << "Enter surname: ";
+	cin.get(temp, 25); cin.ignore();
+	strcpy(this->surname, temp);
+	cout << "Enter classes: ";
+	for (int i = 0; i < 5; i++){
+		cin.get(temp, 25);
+		strcpy(classes[i], temp);
+	}
+	cout << "Enter age of enrollment: ";
+	int number;
+	cin >> number;
+	this->year_enroll = number;
+	cout << "Enter student's age: ";
+	cin >> number;
+	this->age = number;
+}
+void Student::save(char* filename){
+	ofstream outfile(filename, ios_base::out | ios_base::app);
+	if (!outfile.is_open())
+	{
+		cerr << "Error opening file";
+		exit(EXIT_FAILURE);
+	}
+	outfile << "Name:" << name << "\n" << "Surname:" << surname << "\n"
+		<< "Year of enrollment:" << year_enroll << "\n" << "Age" << age << "\n";
+	for (int i = 0; i < 5; i++)
+	{
+		outfile << "Class #" << i << " " << classes[i] << endl;
+	}
+	outfile.close();
+
+}
+void Student::read(char* filename){
+	char buff[50];
+	int count = 0;
+	ifstream infile(filename, ios_base::in);
+	if (!infile.is_open()){
+		cerr << "Error opening file!";
+		exit(EXIT_FAILURE);
+
+	}
+	while (!infile.eof())
+	{
+		infile.getline(buff, 50);
+		cout << buff << endl;
+	}
+
+	infile.close();
+
+}
+
+main.cpp:
+
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+#include <string.h>
+#include "student_file.h"
+
+using namespace std;
+
+int main()
+{
+	char **student_class = new char*[5];
+	for (int i = 0; i < 5; i++){
+		student_class[i] = new char[25];
+		cout << "Enter class: ";
+		cin.get(student_class[i], 25); cin.ignore();
+	}
+	Student a("Ivan", "Petrov", student_class, 2000, 19);
+	a.save("student.txt");
+	a.read("student.txt");
+
+//char* name, char* surname, char **m_class, int year, int age
+	system("pause");
+	return 0;
+}

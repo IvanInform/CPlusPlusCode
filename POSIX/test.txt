@@ -1,0 +1,59 @@
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
+#include <pthread.h>
+
+using namespace std;
+
+#define NUM_THREADS 2
+
+struct result{
+	int count;
+	int punct;
+	
+};
+ void *PrintHello(void *t) {
+	 result res;
+	int len = strlen((char*)t);
+	char *str = new char[len + 1];
+	strcpy(str, (char*)t);
+	fstream fs(str, std::fstream::in);
+	if (!fs.is_open)
+	{
+		cout << "unable to open file" << str;
+		exit(-1);
+	}
+	char c;
+	while (fs.get(c))
+	{
+		if (isblank(c)){
+			res.count++;
+		}
+		if (ispunct(c)){
+			res.punct++;
+		}
+	}
+	cout << "number of commas is " << res.punct << endl;
+	cout << "number of spaces is " << res.count << endl;
+	fs.close();
+	pthread_exit(NULL);
+	return NULL;
+}
+int main() {
+	pthread_t threads[NUM_THREADS];
+		int rc;
+	int i;
+	pthread_attr_t attr;
+	void *status;
+	char* filenames[2] = {"test.txt", "test2.txt"};
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	for (i = 0; i < NUM_THREADS; i++) {
+		cout << "main() : creating thread, " << i << endl;
+		rc = pthread_create(&threads[i], &attr, PrintHello, (void *)filenames[i]);
+
+		if (rc) {
+			cout << "Error:unable to create thread," << rc << endl;
+			exit(-1);
+		}
+	}

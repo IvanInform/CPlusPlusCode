@@ -1,0 +1,229 @@
+#ifndef RESERVOIR_H_
+#define RESERVOIR_H_
+#include <iostream>
+#include <string>
+using namespace std;
+
+
+class Reservoir{
+private:
+	string name;
+	int width;
+	int length;
+	int depth;
+	int area;
+	int volume;
+public:
+	Reservoir();
+	Reservoir(string m_name, int x, int y, int z);
+	Reservoir(Reservoir&a);
+	void set_pool();
+	string get_name();
+	int getsqr(){ return area; }
+	int getvolume(){ return volume; }
+	void surface();
+	bool isPond();//объем воды менее 1 млн м?
+	bool isSee();//объем воды более 1 млн м?)
+	friend void Common(Reservoir&first, Reservoir&second); //сравнить одинаковый тип или нет
+	friend bool Comm(Reservoir&first, Reservoir&second);
+	Reservoir& operator=(const Reservoir &a);
+	friend istream& operator>>(istream&in, Reservoir*a);
+	void show();
+};
+#endif
+
+realize.cpp:
+
+#include <iostream>
+#include <string>
+#include "reservoir.h"
+using namespace std;
+
+Reservoir::Reservoir() :width(0), length(0), depth(0),area(0), volume(0){
+	name = "\0"; }
+Reservoir::Reservoir(string m_name, int x, int y, int z){
+	name = m_name;
+	width = x;
+	length = y;
+	depth = z;
+	area = width*length;
+	volume = (width)*(length)*(depth);
+	}
+Reservoir::Reservoir(Reservoir&a){
+	name = a.name;
+	width = a.width;
+	length = a.length;
+	depth = a.depth;
+	area = a.area;
+	volume = a.volume;
+	}
+void Reservoir::surface(){
+	char choice;
+	int cir_sqr;
+	int radius;
+	int scale;
+	int cm;
+	cout << "If reservoir is circle, enter <y>..."; cin >> choice; cin.ignore();
+	if (choice == 'y'){
+		cout << "\nEnter radius:"; cin >> radius;
+		cout << "Surface is: " << radius*radius*3.14 << endl;
+	}
+	else {
+		cout << "\nEnter scale of map: "; cin >> scale; 
+		cout << "\nEnter sum of cm that pool covers: "; cin >> cm;
+		cout << "Surface is: " << cm*scale << endl;
+	}
+
+}
+string Reservoir::get_name(){
+	return name;
+}
+void Reservoir::set_pool(){
+	cout << "Enter name: "; getline(cin, name);
+	cout << "\nEnter width: "; cin >> width; cin.ignore();
+	cout << "\nEnter length: "; cin >> length; cin.ignore();
+	cout << "\nEnter depth: "; cin >> depth; cin.ignore();
+	area = width*length;
+	volume = width*length*depth;
+}
+
+bool Reservoir::isPond(){
+	if (volume<1000000)
+		return true;
+	else
+		return false;
+
+}//объем воды менее 1 млн м?
+bool Reservoir::isSee(){
+	if (volume>1000000)
+		return true;
+	else
+		return false;
+
+}//объем воды более 1 млн м?)
+void Common(Reservoir&first, Reservoir&second){
+	if (first.isSee() && second.isSee())
+		cout << "\nReservoirs are sees!" << endl;
+	else if (first.isPond() && second.isPond())
+		cout << "\nReservoirs are ponds" << endl;
+	else
+		cout << "\nReservoirs are differents!" << endl;
+} 
+
+Reservoir& Reservoir::operator=(const Reservoir &a) {
+	length = a.length;
+	name = a.name;
+	width = a.width;
+	depth = a.depth;
+	return *this;
+}
+
+void Reservoir::show(){
+	cout << "Reservoir's name: " << name << endl;
+	cout << "Reservoir's width: " << width << endl;
+	cout << "Reservoir's length: " << length << endl;
+	cout << "Reservoir's depth: " << depth << endl;
+	cout << "Reservoir's volume: " << volume << endl;
+	cout << "Reservoir's area: " << area << endl;
+
+}
+	
+bool Comm(Reservoir&first, Reservoir&second){
+	if (first.isSee() && second.isSee())
+		return true;
+	else if (first.isPond() && second.isPond())
+		return true;
+	else
+		return false;
+	}
+
+main.cpp:
+
+#include < iostream>
+#include <string>
+#include "reservoir.h"
+
+using namespace std;
+
+int main(){
+	int number;
+	cout << "Please, enter initial number of reservoirs to add to list:"; cin >> number; cin.ignore();
+	Reservoir *lst = new Reservoir[number];
+	cout << "Please, enter information about reservoirs in the list:\n";
+	for (int i = 0; i < number; i++)
+	{
+		lst[i].set_pool();
+	}
+	string s_name;
+	cout << "If you want to search for reservoir info. please enter name: \n\
+			else enter <q>";
+	getline(cin, s_name);
+	if ((s_name.compare("q")))
+	{
+		for (int i = 0; i < number; i++)
+		{
+			if (!(s_name.compare(lst[i].get_name())))
+			{
+				lst[i].show();
+			}
+		}
+	}
+	char choice_add;
+	cout << "If you want to add reservoir to the list, enter <y>.."; cin >> choice_add; cin.ignore();
+	if (choice_add == 'y')
+	{
+		Reservoir tmp;
+		tmp.set_pool();
+		Reservoir *temp = new Reservoir[++number];
+		for (int i = 0; i < number; i++)
+		{
+			if (i < (number - 1))
+			{
+				temp[i] = lst[i];
+			}
+			else temp[i] = tmp;
+		}delete[]lst;
+		lst = temp;
+	}
+	cout << "If you want to delete reservoir from list, press <y>"; cin >> choice_add; cin.ignore();
+	if (choice_add == 'y'){
+		cout << "Enter name: "; cin >> s_name;
+		Reservoir *temp = new Reservoir[--number];
+		for (int i = 0; i < number; i++)
+		{
+			if ((s_name.compare(lst[i].get_name())))
+			{
+				temp[i] = lst[i];
+			}delete[]lst;
+			lst = temp;
+		}
+	}
+	cout << "If you want to see complete list press <y>"; cin >> choice_add; cin.ignore();
+	if (choice_add == 'y'){
+		for (int i = 0; i < number; i++)
+		{
+			cout << "#" << i << "reservoir: \n";
+			lst[i].show();
+		}
+	}
+	int index1;
+	int index2;
+	cout << "Please, enter list indexes to compare if they're in the same category\
+	choose from 0 to end: "; cin >>index1; cout << endl;
+	cin >> index2;
+	Common(lst[index1], lst[index2]);
+	cout << "If you know that reservoir's are common you can compare is area's\
+	 choose indexes again"; cin >> index1; cin>>index2;
+	if ((Comm(lst[index1],lst[index2])))
+	{
+		if (lst[index1].getsqr() == lst[index2].getsqr())
+		{
+			cout << "squares are equal!";
+		}
+		else
+			cout << "squares are unequal!!!";
+	}
+	
+	system("pause");
+	return 0;
+}

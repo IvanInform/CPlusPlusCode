@@ -1,0 +1,180 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+template <class T>
+class base {
+	T value1;
+	T value2;
+public:
+	base();
+	base(T some1, T some2);
+	virtual ~base();
+	virtual void set_values(T some1, T some2);
+	T getvalue1();
+	T getvalue2();
+	virtual T max();
+	virtual T min();
+	virtual T average();
+
+};
+template<typename T>
+base<T>::base(){}
+template<typename T>
+base<T>::base(T some1, T some2){ value1 = some1; value2 = some2; }
+template<typename T>
+base<T>::~base(){}
+template<typename T>
+void base<T>::set_values(T some1, T some2){ value1 = some1; value2 = some2; }
+template<typename T>
+T base<T>::getvalue1(){ return value1; }
+template<typename T>
+T base<T>::getvalue2(){ return value2; }
+template<typename T>
+T base<T>::max() { return (value1 > value2) ? value1 : value2; }
+template<typename T>
+T base<T>::min(){ return (value1 < value2) ? value1 : value2; }
+template<typename T>
+T base<T>::average(){ return (value1 + value2) / 2; }
+
+template <class T>
+class child1 : public base<T>{
+	T value3;
+	T value4;
+public:
+	child1();
+	child1(T some1, T some2, T some3, T some4);
+	virtual ~child1();
+	void set_values(T some1, T some2, T some3,T some4);
+	T get_value3();
+	T get_value4();
+	T max();
+	T min();
+	T average();
+	virtual void show();
+};
+template<typename T>
+child1<T>::child1(){}
+template <typename T>
+child1<T>::child1(T some1, T some2, T some3, T some4):value3(some3),value4(some4){
+	base<T>::value1 = some1;
+	base<T>::value2 = some2;
+}
+template <typename T>
+child1<T>::~child1(){}
+template<typename T>
+void child1<T>::set_values(T some1, T some2, T some3, T some4){
+	value3 = some3;
+	value4 = some4;
+	base<T>::set_values(some1, some2);
+}
+template <typename T>
+T child1<T>::get_value3(){ return value3; }
+template <typename T>
+T child1<T>::get_value4(){ return value4; }
+template<typename T>
+T child1<T>::max(){
+	T max = (value3 > value4) ? value3 : value4; T base_max = base<T>::max();
+return (base_max > max) ? base_max: max;
+}
+template <typename T>
+T child1<T>::min(){
+	T min = (value3 > value4) ? value3 : value4;
+	T base_min = base<T>::min();
+	return (base_min < min) ? base_min : min;
+}
+template <typename T>
+T child1<T>::average(){
+	T sum = value3 + value4 + base<T>::getvalue1() + base<T>::getvalue2();
+	return sum / 4;
+}
+template <typename T>
+void child1<T>::show(){
+	cout << base<T>::getvalue1() << " " << base<T>::getvalue2() << " " << value3 << " " << value4 << " " << endl;
+	cout << "max: " << this->max() << " min: " << this->min() << " average: " << this->average();
+
+}
+template <class T>
+class child2 :public child1 <T> {
+	T value5;
+	T value6;
+public:
+	child2();
+	child2(T some1, T some2, T some3, T some4, T some5, T some6);
+	~child2();
+	void set_values(T some1, T some2, T some3, T some4, T some5, T some6);
+	T get_value5();
+	T get_value6();
+	T max();
+	T min();
+	T average();
+	void show();
+
+};
+template<typename T>
+child2<T>::child2(){}
+template<typename T>
+child2<T>::child2(T some1, T some2, T some3, T some4, T some5, T some6){
+	child1<T>::child1(some1, some2, some3, some4);
+	value5 = some5;
+	value6 = some6;
+}
+template<typename T>
+child2<T>::~child2(){}
+template<typename T>
+void child2<T>::set_values(T some1, T some2, T some3, T some4, T some5, T some6){
+	child1<T>::set_values(some1, some2, some3, some4);
+	value5 = some5;
+	value6 = some6;
+}
+template<typename T>
+T child2<T>::get_value5(){ return value5; }
+template<typename T>
+T child2<T>::get_value6(){ return value6; }
+template<typename T>
+T child2<T>::max(){
+	T max = (value5 > value6) ? value5 : value6;
+	T child1max = child1<T>::max();
+	return (child1max > max) ? child1max : max;
+}
+template<typename T>
+T child2<T>::min(){
+	T min = (value5 < value6) ? value5 : value6;
+	T child1min = child1<T>::min();
+	return (child1min < min) ? child1min : min;
+
+}
+template<typename T>
+T child2<T>::average(){
+	T average = (value5 + value6) / 2;
+	return (child1<T>::average() + average) / 2;
+
+}
+template<typename T>
+void child2<T>::show(){
+	cout << base<T>::getvalue1() << " " << base<T>::getvalue2() << " "
+		<< child1<T>::get_value3() << " " << child1<T>::get_value4() << " "
+		<< "\n" << value5 << " " << value6 << endl;
+	cout << "average: " << average() << "\n"
+		<< "min: " << min() << "\tmax: " << max() << endl;
+}
+
+main.cpp:
+
+#include <iostream>
+#include "inheritance.h"
+#include <string>
+using namespace std;
+
+int main(){
+	child1<int>b;
+	b.set_values(1, 6, 7, 15);
+	b.show();
+	cout << endl;
+	child2<double> a;
+	a.set_values(1.3, 2.5, 3.7, 4.1,5.6,7.0);
+	a.show();
+	
+	system("pause");
+	return 0;
+}

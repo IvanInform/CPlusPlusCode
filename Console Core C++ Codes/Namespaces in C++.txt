@@ -1,0 +1,570 @@
+main.cpp: 
+#include <iostream>
+#include <string>
+#include "Queue.h"
+#include "Stack.h"
+
+using namespace std;
+/*
+¬ рамках предыдущих самосто€тельный и домашних заданий вы создали набор классов по
+рабте со стуктурами данных (списки, деревь€ и т.д.). –азместите уже созданные классы
+в простанствах имен. ѕродумайте правильную структуру созданных пространств.
+»спользу€ механиз пространств напишите код по тестированию полученного решени€.
+*/
+void check_stack();
+void check_queue();
+int main(){
+	cout << "If you want to check namespace Queue_space--press <1>\n\
+or press <2> to check Stack_space\n";
+	int choice;
+	cin >> choice; cout << endl;
+	switch (choice){
+	case 1:
+	{check_queue();
+	break; }
+	case 2:
+	{check_stack();
+	break; }
+	default: 
+		cout << "Wrong choice";
+	}
+	
+	system("pause");
+	return 0;
+}
+void check_queue(){
+	Queue_space::Queue<int>one;
+	one.enqueue(5);
+	one.enqueue(8);
+	one.enqueue(9);
+	one.enqueue(10);
+	one.dequeue();
+	one.dequeue();
+	Queue_space::Queue<int>two;
+	two = one;
+	two.Show(); cout << endl;
+	Queue_space::Queue<int>three(two);
+	three.Show(); cout << endl;
+	three = one + two;
+	three.Show();
+	three = one*two;
+	three.Show();
+}
+void check_stack(){
+	Stack_space::Stack<int>example;
+	example.push(1);
+	example.push(2);
+	example.push(7);
+	example.push(9);
+	example.show(); cout << endl;
+	Stack_space::Stack<int>exaTwo;
+	exaTwo.push(1);
+	exaTwo.push(2);
+	exaTwo.push(6);
+	exaTwo.show();
+	cout << endl;
+	Stack_space::Stack<int>four;
+	Stack_space::Stack<int>five;
+	four = five*example;
+	four.show();
+
+}
+
+Stack.h
+#pragma once
+#include <iostream>
+
+using namespace std;
+namespace Stack_space{
+	template<typename T>
+	struct Node{
+		T data;
+		Node *next;
+	};
+	template <class T>
+	class Stack{
+		Stack_space::Node<T> *head;
+		int count;
+		int max_length;
+		enum { EMPTY = -1, FULL = 20 };
+	public:
+		Stack();
+		Stack(int length);
+		Stack(const Stack &obj);
+		~Stack();
+		bool isEmpty();
+		void push(T data_);
+		T pop();
+		T top();
+		bool isFULL();
+		Stack& operator=(const Stack &obj);
+		void show();
+		Stack operator+(const Stack&right);
+		Stack operator * (const Stack &right);
+		int getcount()const;
+		int get_max()const;
+		Stack_space::Node<T>* gethead()const;
+		T FindbyPosition(int pos);
+		void clear();
+		void Reverse();
+		T getValue(int index)const;
+		void set_max(int);
+		bool compare(T value)const;
+	};
+	
+}
+
+template <typename T>
+bool Stack_space::Stack<T>::compare(T value) const
+{
+	Stack_space::Node<T>*current = head;
+	while (current != NULL)
+	{
+		if (current->data == value)
+		{
+			return true;
+		}
+		current = current->next;
+	}
+	return false;
+}
+template <typename T>
+void Stack_space::Stack<T>::set_max(int value){
+	max_length = value;
+}
+template <typename T>
+T Stack_space::Stack<T>::getValue(int index) const{
+	if (count == EMPTY || index > count)
+	{
+		cout << "Stack is empty!";
+		return -1;
+	}
+	else {
+		Stack_space::Node<T>*current = head;
+		for (int i = 0; i < index; i++)
+		{
+			current = current->next;
+		}
+		return current->data;
+	}
+
+}
+template<typename T>
+void Stack_space::Stack<T>::Reverse(){
+	Stack_space::Node<T>*current, *prev, *next;
+	current = head;
+	prev = NULL;
+	while (current != NULL)
+	{
+		next = current->next;
+		current->next = prev;
+		prev = current;
+		current = next;
+	}
+	head = prev;
+}
+template <typename T>
+void Stack_space::Stack<T>::clear(){
+	if (isEmpty())
+	{
+		return;
+	}
+	while (!(isEmpty()))
+	{
+		pop();
+	}
+
+}
+template <typename T>
+Stack_space::Stack<T>::Stack() :count(EMPTY), head(NULL), max_length(0){
+}
+template <typename T>
+Stack_space::Stack<T>::Stack(int length) : max_length(length), head(NULL), count(EMPTY){
+}
+template <typename T>
+Stack_space::Stack<T>::Stack(const Stack<T> &obj) : head(NULL), count(EMPTY), max_length(obj.get_max()){
+	for (int i = 0; i < obj.getcount() + 1; i++)
+	{
+		push(obj.getValue(i));
+	}
+}
+template <typename T>
+Stack_space::Stack<T>::~Stack(){
+	clear();
+}
+template <typename T>
+bool Stack_space::Stack<T>::isEmpty(){
+	return count == EMPTY;
+}
+template <typename T>
+void Stack_space::Stack<T>::push(T data_){
+	if (isFULL()){
+		Node<T>*temp = new Node<T>;
+		temp->next = head;
+		temp->data = data_;
+		head = temp;
+		count++;
+		max_length *= 2;;
+	}
+	else {
+		Stack_space::Node<T> *temp = new Node<T>;
+		temp->next = head;
+		temp->data = data_;
+		head = temp;
+		count++;
+	}
+}
+template <typename T>
+bool Stack_space::Stack<T>::isFULL(){
+	return count == max_length;
+}
+template <typename T>
+T Stack_space::Stack<T>::pop(){
+	if (isEmpty())
+	{
+		cout << "List is empty!\n";
+		return 0;
+	}
+	Stack_space::Node<T>*current = head;
+	T tmp = current->data;
+	head = current->next;
+	delete current;
+	count--;
+	return tmp;
+}
+template <typename T>
+T Stack_space::Stack<T>::top(){
+	return head->data;
+}
+template <typename T>
+int Stack_space::Stack<T>::getcount()const{
+	return count;
+}
+template<typename T>
+int Stack_space::Stack<T>::get_max()const{
+	return max_length;
+}
+template <typename T>
+Stack_space::Node<T>* Stack_space::Stack<T>::gethead()const{
+	return head;
+
+}
+template<typename T>
+T Stack_space::Stack<T>::FindbyPosition(int pos){
+	if (isEmpty() && (pos > count))
+		return -1;
+	else {
+		Stack_space::Node<T>*current = head;
+		for (int i = 0; i < pos; i++)
+		{
+			current = current->next;
+		} return current->data;
+	}
+
+}
+template <typename T>
+Stack_space::Stack<T>& Stack_space::Stack<T>::operator=(const Stack<T> &obj){
+	if (this == &obj) return *this;
+	else if (obj.getcount() == EMPTY){
+		clear(); return *this;
+	}
+	else {
+		clear();
+		max_length = obj.get_max();
+	for (int i = 0; i<obj.getcount() + 1; i++){
+			push(obj.getValue(i));
+		}
+		Reverse();
+	}
+	return *this;
+}
+template <typename T>
+void Stack_space::Stack<T>::show(){
+	if (isEmpty())
+	{
+		cout << "Stack is empty!\n"; return;
+	}
+	Stack_space::Node<T>*current = head;
+	while (current){
+		cout << current->data << "\t";
+		current = current->next;
+	}cout << endl;
+}
+template <typename T>
+Stack_space::Stack<T> Stack_space::Stack<T>::operator+(const Stack<T>&right){
+	if (count == EMPTY) {
+		Stack<T>temp;
+		temp = right;
+		return temp;
+	}
+	else if (right.getcount() == EMPTY) {
+		Stack_space::Stack<T> temp(max_length);// could be done through copy constructor: Stack<T> temp(*this);
+		Stack_space::Node<T>*p = head;
+		while (p->next != NULL)
+		{
+			temp.push(p->data);
+			p = p->next;
+		}return temp;
+	}
+	else {
+		Stack_space::Stack<T> temp; temp = right;//Stack<T> temp(right);
+		Stack_space::Node<T>*p = head;
+		while (p != NULL)
+		{
+			temp.push(p->data);
+			p = p->next;
+		}temp.set_max(max_length + right.get_max());
+		return temp;
+	}
+}
+template <typename T>
+Stack_space::Stack<T> Stack_space::Stack<T>::operator * (const Stack<T> &right){
+	Stack_space::Stack<T>temp; temp = right;
+	Stack_space::Node<T>*current = head;
+	while (current != NULL)
+	{
+		if (right.compare(current->data)) { current = current->next; continue; }
+		else { temp.push(current->data); }
+		current = current->next;
+	}
+	temp.set_max(max_length + right.get_max());
+	return temp;
+}
+
+Queue.h:
+#pragma once;
+#include <iostream>
+
+using namespace std;
+
+namespace Queue_space{
+	template<typename T>
+	struct Node{
+		T data;
+		Node<T>*next;
+		Node<T>*prev;
+	};
+
+	template<class T>
+	class Queue{
+		Node<T> *head, *tail;
+		int count; int maxcount;
+	public:
+		Queue();
+		Queue(int max);
+		Queue(const Queue<T>&obj);
+		~Queue();
+		void enqueue(T value);
+		T dequeue();
+		void Clear();
+		bool isEmpty();
+		bool isFull();
+		int GetCount();
+		Node<T>* newnode(T k){
+			Node<T> *temp = new Node<T>;
+			temp->data = k;
+			temp->next = NULL; temp->prev = NULL;
+			return temp;
+		}
+		void Show();
+		int getcount()const;
+		int getmax() const;
+		void setmax(int);
+		Queue<T>& operator= (const Queue<T>obj);
+		Queue<T> operator+ (const Queue<T> obj);
+		Queue<T> operator *(const Queue<T> obj);
+		void AddTail(T value);
+		bool compare(T value)const;
+		T getValue(int)const;
+		};
+
+}
+template<typename T>
+	T Queue_space::Queue<T>::getValue(int index)const{
+		if (count == 0){
+			return -1;
+		}
+		else if (index<0 || index>count)
+		{
+			cout << "OutofBoundaryError!" << endl;
+			return -1;
+		}
+		else {
+			Node<T>*current = head;
+			for (int i = 0; i < index; i++)
+			{
+				current = current->next;
+			}
+			return current->data;
+		}
+	}
+	template <typename T>
+	void Queue_space::Queue<T>::setmax(int value){
+		maxcount = value;
+	}
+	template <typename T>
+	bool Queue_space::Queue<T>::compare(T value)const{
+		Node<T>*current = head;
+		while (current != NULL)
+		{
+			if (current->data == value)
+			{
+				return true;
+			}current = current->next;
+		} return false;
+	}
+	template <typename T>
+	void Queue_space::Queue<T>::AddTail(T value){
+		if (isFull()){
+			cout << "Queue is full!" << endl; return;
+		}
+		Node<T>*temp = head;
+		Node<T>* newNode = newnode(value);
+		if (head == NULL){
+			head = tail = newNode; count++;
+			return;
+		}
+		while (temp->next != NULL)
+			temp = temp->next;
+		tail = temp->next = newNode;
+		newNode->prev = temp; count++;
+	}
+	template <typename T>
+	Queue_space::Queue<T>::Queue() :count(0), maxcount(25){
+		head = tail = NULL;
+	}
+	template <typename T>
+	Queue_space::Queue<T>::Queue(int max) : count(0), maxcount(max){
+		head = tail = NULL;
+	}
+	template <typename T>
+	Queue_space::Queue<T>::~Queue(){
+		Clear();
+	}
+	template <typename T>
+	int Queue_space::Queue<T>::getcount()const{
+		return count;
+	}
+	template <typename T>
+	int Queue_space::Queue<T>::getmax()const{
+		return maxcount;
+	}
+	template <typename T>
+	Queue_space::Queue<T>::Queue(const Queue<T>&obj){
+		count = 0; maxcount = obj.getmax();
+		head = tail = NULL;
+		for (int i = 0; i < obj.getcount(); i++)
+		{
+			AddTail(obj.getValue(i));
+		}
+
+	}
+	template <typename T>
+	void Queue_space::Queue<T>::enqueue(T value){
+		if (count == maxcount){
+			cout << "Queue is full!";
+			return;
+		}
+		Node<T>*temp = newnode(value);
+		if (head != NULL){
+			head->prev = temp;
+			temp->next = head;
+		}
+		if (count == 0){
+			head = tail = temp;
+		}
+		else head = temp;
+		count++;
+	}
+	template <typename T>
+	T Queue_space::Queue<T>::dequeue(){
+		T temp;
+		if (isEmpty())
+			return NULL;
+		else {
+			temp = tail->data;
+			Node<T>* current = tail;
+			tail = current->prev;
+			tail->next = NULL;
+			delete current; count--;
+		}
+		return temp;
+	}
+	template<typename T>
+	void Queue_space::Queue<T>::Clear(){
+		Node<T>*del = head;
+		while (del != NULL)
+		{
+			head = head->next;
+			delete del;
+			del = head;
+		}
+		tail = head = NULL;
+	}
+	template<typename T>
+	bool Queue_space::Queue<T>::isEmpty(){
+		return count == 0;
+	}
+	template<typename T>
+	bool Queue_space::Queue<T>::isFull(){
+		return count == maxcount;
+	}
+	template <typename T>
+	int Queue_space::Queue<T>::GetCount(){
+		return count;
+	}
+	template<typename T>
+	void Queue_space::Queue<T>::Show(){
+		if (!(isEmpty()))
+		{
+			Node<T>*current = head;
+			int out = 0;
+			while (current != 0)
+			{
+				cout << current->data << " ";
+				out++;
+				if ((out % 10) == 0)
+				{
+					cout << endl;
+				}current = current->next;
+			}cout << endl;
+		}
+		else cout << "Queue is empty!" << endl;
+
+	}
+	template<typename T>
+	Queue_space::Queue<T>& Queue_space::Queue<T>::operator=(const Queue<T>obj){
+		if (this == &obj)
+			return *this;
+		Clear();
+		Node<T>*temp = obj.head;
+		while (temp != 0){
+			AddTail(temp->data);
+			temp = temp->next;
+		}return *this;
+	}
+	template <typename T>
+	Queue_space::Queue<T> Queue_space::Queue<T>::operator +(const Queue<T> obj)
+	{
+		Queue<T> result(*this);
+		Node<T>*temp = obj.head;
+		while (temp != 0)
+		{
+			result.AddTail(temp->data);
+			temp = temp->next;
+		}
+		return result;
+	}
+	template <typename T>
+	Queue_space::Queue<T> Queue_space::Queue<T>::operator *(const Queue<T> obj){
+		Queue<T> result(obj); result.setmax(maxcount + obj.getmax());
+		Node <T>*current = head;
+		int i = 0;
+		while (current != NULL)
+		{
+			if (obj.compare(current->data)) { current = current->next; continue; }
+			else { result.enqueue(current->data); current = current->next; }
+		}
+
+		return result;
+	}

@@ -1,0 +1,285 @@
+List_Stack.h:
+#pragma once;
+#include <iostream>
+
+using namespace std;
+template <typename T>
+struct Node{
+	T data;
+	Node *next;
+
+};
+template <class T>
+class Stack{
+	Node<T> *head;
+	int count;
+	int max_length;
+	enum { EMPTY = -1, FULL = 20 };
+public:
+	Stack();
+	Stack(int length);
+	Stack(const Stack &obj);
+	~Stack();
+	bool isEmpty();
+	void push(T data_);
+	T pop();
+	T top();
+	bool isFULL();
+	Stack& operator=(const Stack &obj);
+	void show();
+	Stack operator+(const Stack&right);
+	Stack operator * (const Stack &right);
+	int getcount()const;
+	int get_max()const;
+	Node<T>* gethead()const;
+	T FindbyPosition(int pos);
+	void clear();
+	void Reverse();
+	T getValue(int index)const;
+	void set_max(int);
+	bool compare(T value)const;
+};
+template <typename T>
+bool Stack<T>::compare(T value) const
+{
+	Node<T>*current = head;
+	while (current!=NULL)
+	{
+		if (current->data == value)
+		{
+			return true;
+		}
+		current = current->next;
+	}
+	return false;
+}
+template <typename T>
+void Stack<T>::set_max(int value){
+	max_length = value;
+}
+template <typename T>
+	T Stack<T>::getValue(int index) const{
+		if (count == EMPTY || index > count)
+		{
+			cout << "Stack is empty!";
+			return -1;
+		}
+		else {
+			Node<T>*current = head;
+			for (int i = 0; i < index; i++)
+			{current = current->next;
+			}
+			return current->data;
+		}
+		
+}
+template<typename T>
+void Stack<T>::Reverse(){
+	Node<T>*current, *prev, *next;
+	current = head;
+	prev = NULL;
+	while (current != NULL)
+	{
+		next = current->next;
+		current->next = prev;
+		prev = current;
+		current = next;
+	}
+	head = prev;
+}
+template <typename T>
+void Stack<T>::clear(){
+	if (isEmpty())
+	{
+		return;
+	}
+	while (!(isEmpty()))
+	{
+		pop();
+	}
+
+}
+template <typename T>
+Stack<T>::Stack() :count(EMPTY), head(NULL), max_length(0){
+}
+template <typename T>
+Stack<T>::Stack(int length) : max_length(length), head(NULL), count(EMPTY){
+}
+template <typename T>
+Stack<T>::Stack(const Stack<T> &obj): head(NULL), count(EMPTY),max_length(obj.get_max()){
+	for (int i = 0; i < obj.getcount() + 1; i++)
+	{
+		push(obj.getValue(i));
+	}
+}
+template <typename T>
+Stack<T>::~Stack(){
+	clear(); 
+}
+template <typename T>
+bool Stack<T>::isEmpty(){
+	return count == EMPTY;
+}
+template <typename T>
+void Stack<T>::push(T data_){
+	if (isFULL()){
+		Node<T>*temp = new Node<T>;
+		temp->next = head;
+		temp->data = data_;
+		head = temp;
+		count++;
+		max_length *= 2;;
+	}
+	else {
+		Node<T> *temp = new Node<T>;
+		temp->next = head;
+		temp->data = data_;
+		head = temp;
+		count++;
+	}
+}
+template <typename T>
+bool Stack<T>::isFULL(){
+	return count == max_length;
+}
+template <typename T>
+T Stack<T>::pop(){
+	if (isEmpty())
+	{
+		cout << "List is empty!\n";
+		return 0;
+	}
+	Node<T>*current = head;
+	T tmp = current->data;
+	head = current->next;
+	delete current;
+	count--;
+	return tmp;
+}
+template <typename T>
+T Stack<T>::top(){
+	return head->data;
+}
+template <typename T>
+int Stack<T>::getcount()const{
+	return count;
+}
+template<typename T>
+int Stack<T>::get_max()const{
+	return max_length;
+}
+template <typename T>
+Node<T>* Stack<T>::gethead()const{
+	return head;
+
+}
+template<typename T>
+T Stack<T>::FindbyPosition(int pos){
+	if (isEmpty() && (pos > count))
+		return -1;
+	else {
+		Node<T>*current = head;
+		for (int i = 0; i < pos; i++)
+		{
+			current = current->next;
+		} return current->data;
+	}
+
+}
+template <typename T>
+Stack<T>& Stack<T>::operator=(const Stack<T> &obj){
+	if (this == &obj) return *this;
+	else if (obj.getcount() == EMPTY){
+		clear(); return *this;
+	}
+	else {
+		clear();
+		max_length = obj.get_max();
+		/*Node<T>*current = obj.gethead(); */
+		for (int i=0;i<obj.getcount()+1;i++){
+			push(obj.getValue(i));
+			}
+		Reverse();
+	}
+	return *this;
+}
+template <typename T>
+void Stack<T>::show(){
+	if (isEmpty())
+	{
+		cout << "Stack is empty!\n"; return;
+	}
+	Node<T>*current = head;
+	while (current){
+		cout << current->data << "\t";
+		current = current->next;
+	}cout << endl;
+}
+template <typename T>
+Stack<T> Stack<T>::operator+(const Stack<T>&right){
+	if (count==EMPTY) {
+		Stack<T>temp;
+		temp = right;// could be Stack<T> temp(right);
+		return temp;
+	}
+	else if (right.getcount()==EMPTY) {
+		Stack<T> temp(max_length);// could be done through copy constructor: Stack<T> temp(*this);
+		Node<T>*p = head;
+		while (p->next != NULL)
+		{
+			temp.push(p->data);
+			p = p->next;
+		}return temp;
+	}
+	else {
+		Stack<T> temp; temp = right;//Stack<T> temp(right);
+		Node<T>*p = head;
+		while (p != NULL)
+		{
+			temp.push(p->data);
+			p = p->next;
+		}temp.set_max(max_length + right.get_max());
+			return temp;
+	}
+}
+template <typename T>
+Stack<T> Stack<T>::operator * (const Stack<T> &right){
+	Stack<T>temp; temp = right;
+	Node<T>*current = head;
+	while (current!=NULL)
+	{
+		if (right.compare(current->data)) { current = current->next; continue; }
+		else { temp.push(current->data);  }
+		current = current->next;
+	}
+	temp.set_max(max_length + right.get_max());
+	return temp;
+}
+
+main.cpp:
+
+#include <iostream>
+#include "List_Stack.h"
+
+using namespace std;
+
+int main(){
+	Stack<int>example;
+	example.push(1);
+	example.push(2);
+	example.push(7);
+	example.push(9);
+	example.show(); cout << endl;
+	Stack<int>exaTwo;
+	exaTwo.push(1);
+	exaTwo.push(2);
+	exaTwo.push(6);
+	exaTwo.show();
+	cout << endl;
+	Stack<int>four;
+	Stack<int>five;
+	four = five*example;
+	four.show();
+	system("pause");
+	return 0;
+}

@@ -1,0 +1,157 @@
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <sstream>  
+#include <fstream>
+//#include <queue>
+////#include <deque>
+#include <queue>
+#include <list>
+#include <stack>
+#include <functional>
+//#include <cassert>
+#include <set>
+using namespace std;
+
+/*Создайте приложение «Валидатор HTML - файлов».Приложе -ние запрашивает у пользователя путь
+к файлу, после чего прове -ряет файл на валидность.Критерием валидности для вашего про -
+екта являются правила : все открытые теги должны закрываться,если был знак < его должен закрыть
+знак >.По итогам валидации Лабораторная работа №25 нужно отобразить результат проверки 
+на экран.Используйте для работы с файлами потоки, а для работы со строками класс string.
+Примеры :
+		Содержимое валидного файла
+		<html>
+		<body>To be or not to be< / body>
+		< / html>
+		Содержимое невалидного файла
+		<html>
+		<body To be or not to be< / body>
+		< / html>*/
+
+class validator{
+	string filename;
+	string log;
+public:
+	validator();
+	validator(string&);
+	validator(const validator&obj);
+	~validator();
+	void set_file(string &obj){ filename = obj; log.clear(); }
+	void ckeck_file();
+	void print_log();
+	string getlog()const { return log; }
+	string getfile() const { return filename; }
+	};
+validator::validator(){
+	filename = "example.txt"; log = "";
+}
+validator::validator(const validator&x){
+	filename = x.getfile();
+	log = x.getlog();
+}
+validator::validator(string&x){
+	filename = x; log = "";
+}
+validator::~validator(){}
+
+void validator::print_log(){ 
+	if (!log.empty())
+	cout << log;
+	else cout << "File is valid";
+}
+void validator::ckeck_file(){
+	ifstream infile(filename.c_str(), ios::in);
+	if (!infile)
+	{
+		cerr << "ErrorOpeningFile!" << endl;
+		exit(-1);
+	}
+	string temp;
+	int count = 1;
+	stack<char>mystack;
+	while (!infile.eof())
+	{
+		getline(infile, temp);
+		istringstream stream(temp);
+
+		char c;
+		while (stream.get(c))
+		{
+			switch (c){
+			case '<':
+			{if (!mystack.empty())
+			{
+				log += "error at "; log += to_string(count); log += " symbol\n";
+			}
+			else  mystack.push(c);  }
+				break;
+			case '>': {if (!mystack.empty())
+			{
+						  if (mystack.top() == '<') mystack.pop();
+						  else {
+							  log += "error at "; log += to_string(count); log += " symbol\n";
+						  }
+			}
+					  else {
+						  log += "error at "; log += to_string(count); log += " symbol\n";
+					  }
+			}
+				break;
+			}
+			if (!isspace(c))count++;
+		}stream.ignore();
+	}
+	if (!mystack.empty()){ log += "last tag is not closed\n"; }
+
+}
+
+string menu(){
+	string header = "                          *********                      \n";
+	string menu = "Here's file validator!\n If you want to check file, enter filepass: \n";
+	cout << header << menu;
+	string name;
+	getline(cin, name);
+	return name;
+}
+
+main.cpp:
+
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <stack>
+//#include <queue>
+////#include <deque>
+//#include <queue>
+//#include <list>
+#include <functional>
+#include <stdio.h>
+#include <string.h>
+#include <sstream>  
+//#include <cassert>
+//#include <set>
+#include "validator.h"
+using namespace std;
+
+int main()
+{	validator A(menu());
+char cont = 'a'; string str;
+	while(true){
+		A.ckeck_file();
+		cout << "Result: " << endl;
+		A.print_log(); 
+		cout << "If you want to exit, press <q>\n"; 
+		cin >> cont; cin.ignore();
+		if (cont == 'q')break;
+		cout << "Else enter new filename...\n"; getline(cin, str);
+		A.set_file(str);
+	}
+	system("pause");
+	return 0;
+
+}
